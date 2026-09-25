@@ -93,6 +93,9 @@ role key to client code.
 `components.json` (shadcn/ui, "new-york" style, no RSC, icon library `lucide`). Path alias `@/*` →
 `./src/*` (see `tsconfig.json` and `components.json` aliases). Prettier: 100 print width, double
 quotes, trailing commas, enforced via `eslint-plugin-prettier` as a lint error, not just a formatter.
+`src/integrations/supabase/` is excluded from both ESLint and Prettier because Lovable regenerates
+it and would undo any reformatting; `npm run lint` should exit with 0 errors (the remaining
+`react-refresh` warnings in `src/components/ui/` are standard shadcn exports).
 
 **Vite config**: Most Vite plugins (TanStack Start, React, Tailwind, tsconfig-paths, Nitro,
 env injection, sandbox detection) are pre-configured inside `@lovable.dev/vite-tanstack-config` —
