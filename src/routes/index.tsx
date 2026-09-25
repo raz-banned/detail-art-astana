@@ -2,7 +2,18 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { MANAGER_PHONE, PHONE, ROUTE_LINKS, TWO_GIS_WIDGET, WHATSAPP } from "@/lib/business-info";
+import {
+  ADDRESS,
+  HOURS,
+  LEGAL_ENTITY,
+  MANAGER_PHONE,
+  PHONE,
+  PHONE_HREF,
+  ROUTE_LINKS,
+  SOCIAL_LINKS,
+  TWO_GIS_WIDGET,
+  WHATSAPP,
+} from "@/lib/business-info";
 
 import {
   Sparkles,
@@ -906,15 +917,15 @@ function Index() {
             <ul className="mt-8 space-y-4 text-sm">
               <li className="flex gap-3">
                 <MapPin className="h-5 w-5 shrink-0 text-primary" />
-                <span>г. Астана, Apelsin Industrial Park, ул. Алаш 46/2</span>
+                <span>{ADDRESS}</span>
               </li>
               <li className="flex gap-3">
                 <Clock className="h-5 w-5 shrink-0 text-primary" />
-                <span>Ежедневно 09:00 — 21:00</span>
+                <span>{HOURS}</span>
               </li>
               <li className="flex gap-3">
                 <Phone className="h-5 w-5 shrink-0 text-primary" />
-                <a href={`tel:${PHONE.replace(/\s/g, "")}`} className="hover:text-primary">
+                <a href={PHONE_HREF} className="hover:text-primary">
                   {PHONE}
                 </a>
               </li>
@@ -961,13 +972,75 @@ function Index() {
         ref={footerReveal.ref}
         className={`border-t border-border bg-graphite/50 ${footerReveal.className}`}
       >
-        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-10 sm:flex-row sm:items-center sm:justify-between">
-          <p className="font-display text-xl tracking-widest">
-            APELSIN<span className="text-primary">.</span>DETAILING
-          </p>
-          <div className="flex flex-col items-start gap-1 text-xs text-muted-foreground sm:items-end">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr]">
+          <div>
+            <p className="font-display text-xl tracking-widest">
+              APELSIN<span className="text-primary">.</span>DETAILING
+            </p>
+            <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
+              Детейлинг легковых авто, грузовых фур и мотоциклов в Apelsin Industrial Park.
+            </p>
+          </div>
+
+          <nav aria-label="Разделы сайта">
+            <p className="eyebrow">Разделы</p>
+            <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+              {[...nav, ["Запись", "#booking"]].map(([label, href]) => (
+                <li key={href}>
+                  <a href={href} className="hover:text-primary">
+                    {label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <div>
+            <p className="eyebrow">Контакты</p>
+            <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
+              <li className="flex gap-2">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <span>{ADDRESS}</span>
+              </li>
+              <li className="flex gap-2">
+                <Clock className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <span>{HOURS}</span>
+              </li>
+              <li className="flex gap-2">
+                <Phone className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <a href={PHONE_HREF} className="hover:text-primary">
+                  {PHONE}
+                </a>
+              </li>
+              <li className="flex gap-2">
+                <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <a href={WHATSAPP} target="_blank" rel="noreferrer" className="hover:text-primary">
+                  WhatsApp
+                </a>
+              </li>
+            </ul>
+            {SOCIAL_LINKS.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-4 text-sm">
+                {SOCIAL_LINKS.map(({ label, href }) => (
+                  <a
+                    key={href}
+                    href={href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-muted-foreground hover:text-primary"
+                  >
+                    {label}
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="border-t border-border">
+          <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
             <p>
-              © {new Date().getFullYear()} Apelsin Industrial Park · Астана, Алаш 46/2. Все права
+              © {new Date().getFullYear()} {LEGAL_ENTITY || "Apelsin Industrial Park"}. Все права
               защищены.
             </p>
             <Link to="/privacy" className="hover:text-primary">

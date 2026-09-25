@@ -24,6 +24,17 @@ lockfile in use); a `bun.lock` and `bunfig.toml` also exist but bun's install is
 supply-chain guard (`minimumReleaseAge` in `bunfig.toml`) — check with the user before adding
 packages to the bun-side excludes list.
 
+## Git workflow
+
+- Work on a feature branch off `main` (`feat/...`, `fix/...`) and merge through a GitHub PR.
+- Commit messages: Conventional Commits subject (`feat: ...`, `fix: ...`) plus a short body on what
+  changed and why.
+- PR descriptions have `## Summary` (1–3 bullets), `## Test plan` (checklist: build/lint plus the
+  manual checks a reviewer should do) and `## Screenshots` for UI changes.
+- PRs are squash-merged, with the PR title plus ` (#N)` as the commit subject. Squashing on merge is
+  fine for Lovable; only rewriting commits already on `main` is not.
+- `git pull` is configured to rebase, so stash uncommitted changes before pulling.
+
 ## Architecture
 
 **Routing**: TanStack Start file-based routing under `src/routes/`. `src/routes/__root.tsx` is the
@@ -35,7 +46,14 @@ file-based routing conventions (dynamic `$id`, optional `{-$category}`, splat `$
 The entire homepage (hero, services, pricing, before/after gallery, reviews, about, booking form,
 map, footer) lives in one file: `src/routes/index.tsx`. There are no separate section/page
 components — content arrays (`services`, `pricing`, `reviews`) and the `BookingForm` /
-`BeforeAfter` components are defined inline in that file.
+`BeforeAfter` components are defined inline in that file. The only other page is
+`src/routes/privacy.tsx` (privacy policy for the booking form's personal data).
+
+**Business info**: `src/lib/business-info.ts` is the single source for contact and location data —
+phone, WhatsApp link, address, working hours, 2GIS widget/org id, route links, social links and the
+legal entity. Import from there instead of hardcoding these strings in markup. `SOCIAL_LINKS` and
+`LEGAL_ENTITY` are intentionally empty until confirmed by the owner (the footer hides them while
+empty); never invent company details such as the legal entity, BIN or social accounts.
 
 **Server entry / SSR error handling**: `src/start.ts` registers global middleware
 (`attachSupabaseAuth` for auth, `createCsrfMiddleware` for server functions — defining `src/start.ts`
