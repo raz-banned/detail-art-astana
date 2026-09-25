@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { MANAGER_PHONE, PHONE, WHATSAPP } from "@/lib/business-info";
+import { MANAGER_PHONE, PHONE, ROUTE_LINKS, TWO_GIS_WIDGET, WHATSAPP } from "@/lib/business-info";
 
 import {
   Sparkles,
@@ -20,6 +20,7 @@ import {
   Truck,
   ArrowLeftRight,
   ChevronDown,
+  Navigation,
 } from "lucide-react";
 
 import heroImg from "@/assets/hero-detailing.jpg";
@@ -933,11 +934,25 @@ function Index() {
           <h2 className="mt-3 text-4xl sm:text-5xl">Как нас найти</h2>
           <div className="surface-panel mt-10 overflow-hidden rounded-lg">
             <iframe
-              title="Карта — APELSIN DETAILING, Астана"
-              src="https://www.openstreetmap.org/export/embed.html?bbox=71.46%2C51.19%2C71.54%2C51.23&layer=mapnik&marker=51.207227%2C71.497783"
+              title="Карта 2GIS — APELSIN DETAILING, Астана"
+              src={TWO_GIS_WIDGET}
               className="h-[420px] w-full border-0"
               loading="lazy"
             />
+          </div>
+          <p className="mt-8 text-sm text-muted-foreground">Построить маршрут:</p>
+          <div className="mt-3 flex flex-wrap gap-3">
+            {ROUTE_LINKS.map(({ label, href }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-md border border-border px-6 py-3 text-sm font-semibold tracking-widest uppercase transition-colors hover:border-primary hover:text-primary"
+              >
+                <Navigation className="h-4 w-4" /> {label}
+              </a>
+            ))}
           </div>
         </div>
       </section>
