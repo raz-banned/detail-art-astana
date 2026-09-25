@@ -1,5 +1,15 @@
 export const MANAGER_PHONE = "77084254181";
 export const PHONE = "+7 708 425 4181";
+export const PHONE_HREF = `tel:${PHONE.replace(/\s/g, "")}`;
+
+export const ADDRESS = "г. Астана, Apelsin Industrial Park, ул. Алаш 46/2";
+export const HOURS = "Ежедневно 09:00 — 21:00";
+
+// TODO: fill in once confirmed by the owner; the footer hides these while empty.
+// Official accounts only, e.g. { label: "Instagram", href: "https://instagram.com/..." }.
+export const SOCIAL_LINKS: { label: string; href: string }[] = [];
+// Legal entity shown in the footer and privacy policy, e.g. "ТОО «…», БИН 000000000000".
+export const LEGAL_ENTITY = "";
 
 export const WHATSAPP = `https://wa.me/${MANAGER_PHONE}?text=${encodeURIComponent("Здравствуйте! Хочу записаться на детейлинг")}`;
 
