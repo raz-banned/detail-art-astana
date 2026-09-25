@@ -61,6 +61,8 @@ export const Route = createFileRoute("/")({
           "Детейлинг легковых авто, грузовых фур и мотоциклов в Астане: керамика, полировка, химчистка. Фото до/после, цены и запись онлайн.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:locale", content: "ru_RU" },
+      { property: "og:site_name", content: "APELSIN DETAILING" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
