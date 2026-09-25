@@ -55,6 +55,23 @@ legal entity. Import from there instead of hardcoding these strings in markup. `
 `LEGAL_ENTITY` are intentionally empty until confirmed by the owner (the footer hides them while
 empty); never invent company details such as the legal entity, BIN or social accounts.
 
+## Content reliability
+
+Most of the site's content is unverified placeholder data and is likely wrong. Real information is
+still being collected from the company.
+
+- **Reliable**: phone and WhatsApp number, the address (Apelsin Industrial Park, ул. Алаш 46/2,
+  Астана), the map location / 2GIS organization, the brand name and logo. Anything else counts as
+  unverified unless the user confirms it.
+- **Unverified**: the services list and descriptions, pricing packages, the hero stats ("9 лет на
+  рынке", "3 года гарантия керамики", 2GIS rating), working hours, promises such as "перезвоним в
+  течение 15 минут", "2–3 машины в день" and "фотоотчёт", the "О нас" text, and the photos
+  (`src/assets/hero-detailing.jpg` shows another studio's "PRO DETAILING" branding).
+
+Don't use unverified content as a source for new work: don't copy it into structured data (JSON-LD),
+meta tags, generated images, new pages or `business-info.ts`. Build around the reliable data, leave
+explicit gaps for the rest, and ask the user when unsure whether something is confirmed.
+
 **Server entry / SSR error handling**: `src/start.ts` registers global middleware
 (`attachSupabaseAuth` for auth, `createCsrfMiddleware` for server functions — defining `src/start.ts`
 opts out of TanStack Start's automatic CSRF middleware, so it's re-added explicitly here) plus an
