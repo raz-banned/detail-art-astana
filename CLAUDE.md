@@ -104,7 +104,9 @@ popup blockers, then its `location.href` is set after the Supabase insert resolv
 **Env vars**: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_PROJECT_ID` for
 the client bundle; `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_PROJECT_ID` as SSR
 fallbacks; `SUPABASE_SERVICE_ROLE_KEY` for the server-only admin client. Never expose the service
-role key to client code.
+role key to client code. `.env` is gitignored (it was tracked in early history with keys for an old
+Supabase project — don't restore it from git); copy `.env.example` and fill in values for the
+project in `supabase/config.toml`.
 
 **Styling**: Tailwind CSS 4 (via `@tailwindcss/vite`) with CSS variables, configured through
 `components.json` (shadcn/ui, "new-york" style, no RSC, icon library `lucide`). Path alias `@/*` →
