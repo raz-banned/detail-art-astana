@@ -46,8 +46,9 @@ file-based routing conventions (dynamic `$id`, optional `{-$category}`, splat `$
 The entire homepage (hero, services, pricing, before/after gallery, reviews, about, booking form,
 map, footer) lives in one file: `src/routes/index.tsx`. There are no separate section/page
 components — content arrays (`services`, `pricing`, `reviews`) and the `BookingForm` /
-`BeforeAfter` components are defined inline in that file. The only other page is
-`src/routes/privacy.tsx` (privacy policy for the booking form's personal data).
+`BeforeAfter` components are defined inline in that file. The other public page is
+`src/routes/privacy.tsx` (privacy policy for the booking form's personal data); `/admin` is the
+staff CRM (see below).
 
 **Business info**: `src/lib/business-info.ts` is the single source for contact and location data —
 phone, WhatsApp link, address, working hours, 2GIS widget/org id, route links, social links and the
@@ -99,7 +100,23 @@ The booking form (`BookingForm` in `src/routes/index.tsx`) inserts into a `booki
 `supabase.from("bookings").insert(...)`, validated client-side with a `zod` schema, then redirects a
 pre-opened window to a `wa.me` WhatsApp deep link with the booking details prefilled. The window is
 opened synchronously before the `await` (`window.open("", "_blank", ...)`) so it isn't blocked by
-popup blockers, then its `location.href` is set after the Supabase insert resolves.
+popup blockers, then its `location.href` is set after the Supabase insert resolves. A Supabase
+database webhook on `bookings` INSERT calls the `notify-booking` Edge Function
+(`supabase/functions/`), which posts the booking to Telegram.
+
+**CRM (`/admin`)**: `src/routes/admin.tsx` is a client-only (`ssr: false`, `noindex`) layout that
+shows a Supabase email/password login, checks `is_admin()` and renders child routes;
+`src/routes/admin/index.tsx` lists bookings with status changes and a manager note. Security is
+enforced by RLS, not by the UI: only users listed in `public.admins` can read bookings and update
+their `status` / `note`; `anon` can only insert. Unconfirmed business lists (booking statuses) live
+in `src/lib/crm-config.ts` with `TODO` markers — change them there, not in components.
+
+**Database changes**: there are no migrations in the repo. Schema/RLS changes are written as SQL
+files in `supabase/sql/` and applied by hand in the Supabase SQL Editor; when they add tables,
+columns or functions, update `src/integrations/supabase/types.ts` to match (Lovable regenerates it
+from the live schema, so the hand edit must be what the generator would produce). New tables need
+explicit `GRANT`s for `anon` / `authenticated` in addition to RLS policies — this project doesn't
+grant them automatically.
 
 **Env vars**: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_PROJECT_ID` for
 the client bundle; `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_PROJECT_ID` as SSR
