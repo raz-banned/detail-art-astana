@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Session } from "@supabase/supabase-js";
@@ -37,6 +37,21 @@ function AdminLayout() {
   const queryClient = useQueryClient();
   const userId = session?.user.id;
 
+  // Don't keep customers' data in memory after logout or an account switch. Watching the
+  // session (not just the logout button) also covers logouts made in another tab, which
+  // supabase-js syncs to this one.
+  const prevUserId = useRef(userId);
+  useEffect(() => {
+    if (prevUserId.current && prevUserId.current !== userId) {
+      queryClient.removeQueries({
+        queryKey: ["admin"],
+        // Keep the new user's access check, which is already running.
+        predicate: (q) => !(q.queryKey[1] === "is-admin" && q.queryKey[2] === userId),
+      });
+    }
+    prevUserId.current = userId;
+  }, [userId, queryClient]);
+
   const isAdmin = useQuery({
     queryKey: ["admin", "is-admin", userId],
     enabled: !!userId,
@@ -49,8 +64,6 @@ function AdminLayout() {
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    // Don't keep customers' data in memory after logout.
-    queryClient.removeQueries({ queryKey: ["admin"] });
   };
 
   let content;
