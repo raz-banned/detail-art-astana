@@ -242,8 +242,11 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-// Kazakhstan numbers: "8 7xx..." is the local form of "+7 7xx...".
+// Kazakhstan numbers: "8 7xx..." is the local form of "+7 7xx...", and the booking form
+// also accepts 10 digits without the country code ("7xx...").
 function phoneDigits(phone: string): string {
   const digits = phone.replace(/\D/g, "");
-  return digits.length === 11 && digits.startsWith("8") ? `7${digits.slice(1)}` : digits;
+  if (digits.length === 11 && digits.startsWith("8")) return `7${digits.slice(1)}`;
+  if (digits.length === 10) return `7${digits}`;
+  return digits;
 }
