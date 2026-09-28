@@ -33,6 +33,10 @@ Deno.serve(async (req) => {
   }
 
   const payload: WebhookPayload = await req.json();
+  // The CRM updates bookings (status, note); only new bookings are announced.
+  if (payload.type !== "INSERT") {
+    return new Response("Ignored", { status: 200 });
+  }
   const record = payload.record;
   if (!record) {
     return new Response("No record in payload", { status: 400 });

@@ -24,7 +24,8 @@ function useSession() {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session));
+    // Fires INITIAL_SESSION right away, so no separate getSession() call (which could
+    // resolve late and restore a session that has since changed).
     const { data } = supabase.auth.onAuthStateChange((_event, s) => setSession(s));
     return () => data.subscription.unsubscribe();
   }, []);
@@ -71,7 +72,8 @@ function AdminLayout() {
     content = <CenteredMessage>Загрузка…</CenteredMessage>;
   } else if (!session) {
     content = <LoginForm />;
-  } else if (isAdmin.isError) {
+  } else if (isAdmin.isError && isAdmin.data === undefined) {
+    // Only when there's no answer yet: a failed background refetch keeps the CRM open.
     content = (
       <CenteredMessage>
         Не удалось проверить доступ. Обновите страницу.

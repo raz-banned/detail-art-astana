@@ -1,7 +1,7 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format, parseISO } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -129,6 +129,8 @@ function useUpdateBooking() {
       if (error) throw error;
       return data;
     },
+    // A refetch started before the save could land after it and bring back old values.
+    onMutate: () => queryClient.cancelQueries({ queryKey: BOOKINGS_KEY }),
     onSuccess: (updated) => {
       queryClient.setQueryData<Booking[]>(BOOKINGS_KEY, (old) =>
         old?.map((b) => (b.id === updated.id ? updated : b)),
@@ -141,6 +143,9 @@ function useUpdateBooking() {
 function BookingCard({ booking: b }: { booking: Booking }) {
   const update = useUpdateBooking();
   const [note, setNote] = useState(b.note ?? "");
+  // Follow the saved note when a refetch brings another manager's edit, so saving a stale
+  // draft doesn't silently overwrite it.
+  useEffect(() => setNote(b.note ?? ""), [b.note]);
   const noteChanged = note.trim() !== (b.note ?? "");
   // Keep a status that isn't in BOOKING_STATUSES selectable, so it isn't silently lost.
   const statusOptions = BOOKING_STATUSES.some((s) => s.value === b.status)
@@ -152,7 +157,7 @@ function BookingCard({ booking: b }: { booking: Booking }) {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
           <p className="text-xs text-muted-foreground">
-            {format(parseISO(b.created_at), "d MMMM yyyy, HH:mm", { locale: ru })}
+            {formatDate(b.created_at, "d MMMM yyyy, HH:mm")}
           </p>
           <p className="text-lg font-semibold">{b.name}</p>
           <p className="flex flex-wrap gap-x-3 text-sm">
@@ -196,9 +201,7 @@ function BookingCard({ booking: b }: { booking: Booking }) {
         <Field label="Услуга">{b.service}</Field>
         <Field label="Авто">{b.car || "—"}</Field>
         <Field label="Желаемая дата">
-          {b.preferred_date
-            ? format(parseISO(b.preferred_date), "d MMMM yyyy", { locale: ru })
-            : "—"}
+          {b.preferred_date ? formatDate(b.preferred_date, "d MMMM yyyy") : "—"}
         </Field>
       </dl>
 
@@ -241,6 +244,12 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
       <dd>{children}</dd>
     </div>
   );
+}
+
+// Anyone can insert a booking through the API, so a malformed date must not crash the list.
+function formatDate(value: string, pattern: string): string {
+  const date = parseISO(value);
+  return isValid(date) ? format(date, pattern, { locale: ru }) : value;
 }
 
 // Kazakhstan numbers: "8 7xx..." is the local form of "+7 7xx...", and the booking form
