@@ -65,8 +65,8 @@ still being collected from the company.
   unverified unless the user confirms it.
 - **Unverified**: the services list and descriptions, pricing packages, the hero stats ("9 лет на
   рынке", "3 года гарантия керамики", 2GIS rating), working hours, promises such as "перезвоним в
-  течение 15 минут", "2–3 машины в день" and "фотоотчёт", the "О нас" text, and the photos
-  (`src/assets/hero-detailing.jpg` shows another studio's "PRO DETAILING" branding).
+  течение 15 минут", "2–3 машины в день" and "фотоотчёт", the "О нас" text, and the before/after
+  photos. The hero image (`src/assets/hero-car.webp`) is a generic mood shot, not the studio's work.
 
 Don't use unverified content as a source for new work: don't copy it into structured data (JSON-LD),
 meta tags, generated images, new pages or `business-info.ts`. Build around the reliable data, leave

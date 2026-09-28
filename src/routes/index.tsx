@@ -34,7 +34,7 @@ import {
   Navigation,
 } from "lucide-react";
 
-import heroImg from "@/assets/hero-detailing.jpg";
+import heroImg from "@/assets/hero-car.webp";
 import apelsinLogo from "@/assets/apelsin-logo.webp";
 import beforePaint from "@/assets/before-paint.jpg";
 import afterPaint from "@/assets/after-paint.jpg";
@@ -665,15 +665,18 @@ function Index() {
         </div>
       </div>
 
-      <section id="top" className="relative overflow-hidden">
+      <section id="top" className="relative isolate overflow-hidden bg-background">
+        {/* Portrait photo: full-bleed on mobile, beside the text on desktop. `lighten` drops the
+            photo's own dark backdrop so only the lit car shows, and the mask fades the rest. */}
         <img
           src={heroImg}
-          alt="Детейлинг-центр в Астане"
-          width={1600}
-          height={1008}
-          className="absolute inset-0 h-full w-full object-cover opacity-60"
+          alt=""
+          width={1179}
+          height={2564}
+          fetchPriority="high"
+          className="absolute inset-y-0 right-0 h-full w-full object-cover object-[50%_60%] opacity-60 mix-blend-lighten [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_60%,transparent)] lg:right-[max(4%,calc(50%-40rem))] lg:w-[55%] lg:max-w-[50rem] lg:opacity-100 lg:[mask-image:radial-gradient(closest-side_at_50%_55%,black_60%,transparent)]"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/25" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/25 lg:via-background/40 lg:to-transparent" />
         <div className="relative mx-auto max-w-6xl px-4 py-28 sm:py-36">
           <p
             className={`eyebrow ${ready ? "animate-[fade-in-up_0.6s_ease_both] [animation-delay:60ms]" : "opacity-0"}`}
