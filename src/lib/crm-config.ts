@@ -17,3 +17,22 @@ export function bookingStatusLabel(value: string): string {
   // Unknown values (e.g. a status removed from the list) are shown as-is, not hidden.
   return BOOKING_STATUSES.find((s) => s.value === value)?.label ?? value;
 }
+
+// TODO: подтвердить у компании список источников заявки.
+// `value` is stored in bookings.source as plain text, like statuses.
+// "site" must stay: it's the column default that the public booking form can't override
+// (anon has no INSERT grant on source), and notify-booking sends Telegram only for it.
+export const BOOKING_SOURCES = [
+  { value: "site", label: "Сайт" },
+  { value: "phone", label: "Звонок" },
+  { value: "whatsapp", label: "WhatsApp" },
+  { value: "instagram", label: "Instagram" },
+  { value: "walk_in", label: "Пришёл сам" },
+] as const;
+
+// Sources a manager can pick when adding a booking by hand.
+export const MANUAL_BOOKING_SOURCES = BOOKING_SOURCES.filter((s) => s.value !== "site");
+
+export function bookingSourceLabel(value: string): string {
+  return BOOKING_SOURCES.find((s) => s.value === value)?.label ?? value;
+}

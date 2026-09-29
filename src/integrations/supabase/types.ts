@@ -39,6 +39,7 @@ export type Database = {
           phone: string
           preferred_date: string | null
           service: string
+          source: string
           status: string
         }
         Insert: {
@@ -50,6 +51,7 @@ export type Database = {
           phone: string
           preferred_date?: string | null
           service: string
+          source?: string
           status?: string
         }
         Update: {
@@ -61,6 +63,7 @@ export type Database = {
           phone?: string
           preferred_date?: string | null
           service?: string
+          source?: string
           status?: string
         }
         Relationships: []

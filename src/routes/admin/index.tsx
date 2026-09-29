@@ -1,14 +1,32 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, isValid, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
 import { toast } from "sonner";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tables, TablesUpdate } from "@/integrations/supabase/types";
-import { BOOKING_STATUSES, bookingStatusLabel } from "@/lib/crm-config";
+import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
+import { bookingSchema } from "@/lib/booking-schema";
+import {
+  BOOKING_STATUSES,
+  MANUAL_BOOKING_SOURCES,
+  bookingSourceLabel,
+  bookingStatusLabel,
+} from "@/lib/crm-config";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -41,7 +59,8 @@ function BookingsPage() {
   });
 
   if (bookings.isPending) return <p className="text-muted-foreground">Загрузка заявок…</p>;
-  if (bookings.isError) {
+  // A failed background refetch keeps the loaded list (and an open add-booking dialog).
+  if (bookings.isError && !bookings.data) {
     return (
       <div className="space-y-3">
         <p className="text-destructive">Не удалось загрузить заявки.</p>
@@ -60,9 +79,12 @@ function BookingsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h1 className="font-display text-3xl tracking-wider">Заявки</h1>
-        <Button variant="ghost" size="sm" onClick={() => bookings.refetch()}>
-          {bookings.isFetching ? "Обновляем…" : "Обновить"}
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="ghost" size="sm" onClick={() => bookings.refetch()}>
+            {bookings.isFetching ? "Обновляем…" : "Обновить"}
+          </Button>
+          <AddBookingDialog />
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -140,6 +162,171 @@ function useUpdateBooking() {
   });
 }
 
+const emptyForm = {
+  name: "",
+  phone: "",
+  car: "",
+  service: "",
+  date: "",
+  source: MANUAL_BOOKING_SOURCES[0]?.value ?? "",
+};
+
+const manualBookingSchema = bookingSchema.extend({
+  source: z.string().min(1, "Выберите источник"),
+});
+
+function AddBookingDialog() {
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState(emptyForm);
+  const [error, setError] = useState<string | null>(null);
+
+  const create = useMutation({
+    mutationFn: async (booking: TablesInsert<"bookings">) => {
+      const { data, error } = await supabase.from("bookings").insert(booking).select().single();
+      if (error) throw error;
+      return data;
+    },
+    // Same as saving a status: a refetch started earlier mustn't drop the new booking.
+    onMutate: () => queryClient.cancelQueries({ queryKey: BOOKINGS_KEY }),
+    onSuccess: (created) => {
+      // A refetch that ran after the insert may already contain the new booking.
+      queryClient.setQueryData<Booking[]>(
+        BOOKINGS_KEY,
+        (old) => old && (old.some((b) => b.id === created.id) ? old : [created, ...old]),
+      );
+      toast.success("Заявка добавлена");
+      setOpen(false);
+      setForm(emptyForm);
+    },
+    onError: () => {
+      // The dialog may already be closed, so the inline error alone could go unseen.
+      setError("Не удалось сохранить. Попробуйте ещё раз.");
+      toast.error("Не удалось добавить заявку. Попробуйте ещё раз.");
+    },
+  });
+
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    const parsed = manualBookingSchema.safeParse(form);
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? "Проверьте введённые данные");
+      return;
+    }
+    const d = parsed.data;
+    setError(null);
+    create.mutate({
+      name: d.name,
+      phone: d.phone,
+      car: d.car || null,
+      service: d.service,
+      preferred_date: d.date || null,
+      source: d.source,
+    });
+  };
+
+  const set = (key: keyof typeof emptyForm) => (value: string) =>
+    setForm((f) => ({ ...f, [key]: value }));
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) setError(null);
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button size="sm">Добавить заявку</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Новая заявка</DialogTitle>
+          <DialogDescription>
+            Для клиентов, которые позвонили или написали напрямую. В Telegram не отправляется.
+          </DialogDescription>
+        </DialogHeader>
+        <form id="add-booking" className="grid gap-4 sm:grid-cols-2" onSubmit={submit}>
+          <LabeledField id="booking-name" label="Имя">
+            <Input
+              id="booking-name"
+              required
+              maxLength={80}
+              value={form.name}
+              onChange={(e) => set("name")(e.target.value)}
+            />
+          </LabeledField>
+          <LabeledField id="booking-phone" label="Телефон">
+            <Input
+              id="booking-phone"
+              type="tel"
+              required
+              maxLength={20}
+              placeholder="+7 (___) ___ __ __"
+              value={form.phone}
+              onChange={(e) => set("phone")(e.target.value)}
+            />
+          </LabeledField>
+          <LabeledField id="booking-service" label="Услуга">
+            <Input
+              id="booking-service"
+              required
+              maxLength={120}
+              value={form.service}
+              onChange={(e) => set("service")(e.target.value)}
+            />
+          </LabeledField>
+          <LabeledField id="booking-car" label="Авто">
+            <Input
+              id="booking-car"
+              maxLength={80}
+              value={form.car}
+              onChange={(e) => set("car")(e.target.value)}
+            />
+          </LabeledField>
+          <LabeledField id="booking-date" label="Желаемая дата">
+            <Input
+              id="booking-date"
+              type="date"
+              value={form.date}
+              onChange={(e) => set("date")(e.target.value)}
+            />
+          </LabeledField>
+          <LabeledField id="booking-source" label="Источник">
+            <Select value={form.source} onValueChange={set("source")}>
+              <SelectTrigger id="booking-source">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {MANUAL_BOOKING_SOURCES.map((s) => (
+                  <SelectItem key={s.value} value={s.value}>
+                    {s.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </LabeledField>
+        </form>
+        {error && <p className="text-sm text-destructive">{error}</p>}
+        <DialogFooter>
+          <Button type="submit" form="add-booking" disabled={create.isPending}>
+            {create.isPending ? "Сохраняем…" : "Добавить"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function LabeledField({ id, label, children }: { id: string; label: string; children: ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={id}>{label}</Label>
+      {children}
+    </div>
+  );
+}
+
 function BookingCard({ booking: b }: { booking: Booking }) {
   const update = useUpdateBooking();
   const [note, setNote] = useState(b.note ?? "");
@@ -157,7 +344,7 @@ function BookingCard({ booking: b }: { booking: Booking }) {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
           <p className="text-xs text-muted-foreground">
-            {formatDate(b.created_at, "d MMMM yyyy, HH:mm")}
+            {formatDate(b.created_at, "d MMMM yyyy, HH:mm")} · {bookingSourceLabel(b.source)}
           </p>
           <p className="text-lg font-semibold">{b.name}</p>
           <p className="flex flex-wrap gap-x-3 text-sm">

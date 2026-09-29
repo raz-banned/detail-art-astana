@@ -97,19 +97,24 @@ JSON) into the same rendered error page. `src/lib/error-capture.ts`, `error-page
   server-side auth middleware for protected server functions/routes.
 
 The booking form (`BookingForm` in `src/routes/index.tsx`) inserts into a `bookings` table via
-`supabase.from("bookings").insert(...)`, validated client-side with a `zod` schema, then redirects a
+`supabase.from("bookings").insert(...)`, validated client-side with the `zod` schema in
+`src/lib/booking-schema.ts` (shared with the CRM's manual entry), then redirects a
 pre-opened window to a `wa.me` WhatsApp deep link with the booking details prefilled. The window is
 opened synchronously before the `await` (`window.open("", "_blank", ...)`) so it isn't blocked by
 popup blockers, then its `location.href` is set after the Supabase insert resolves. A Supabase
 database webhook on `bookings` INSERT calls the `notify-booking` Edge Function
-(`supabase/functions/`), which posts the booking to Telegram.
+(`supabase/functions/`), which posts the booking to Telegram — only for `source = 'site'`; bookings
+added by hand in the CRM are skipped. Changes to the function need a separate deploy (Lovable or
+Supabase CLI), a push alone doesn't update it.
 
 **CRM (`/admin`)**: `src/routes/admin.tsx` is a client-only (`ssr: false`, `noindex`) layout that
 shows a Supabase email/password login, checks `is_admin()` and renders child routes;
-`src/routes/admin/index.tsx` lists bookings with status changes and a manager note. Security is
-enforced by RLS, not by the UI: only users listed in `public.admins` can read bookings and update
-their `status` / `note`; `anon` can only insert. Unconfirmed business lists (booking statuses) live
-in `src/lib/crm-config.ts` with `TODO` markers — change them there, not in components.
+`src/routes/admin/index.tsx` lists bookings with status changes and a manager note, and lets staff
+add bookings by hand with a `source` (phone call, WhatsApp, …). Security is enforced by RLS, not by
+the UI: only users listed in `public.admins` can read and insert bookings and update their
+`status` / `note`; `anon` can only insert, with `source = 'site'`. Unconfirmed business lists
+(booking statuses and sources) live in `src/lib/crm-config.ts` with `TODO` markers — change them
+there, not in components.
 
 **Database changes**: there are no migrations in the repo. Schema/RLS changes are written as SQL
 files in `supabase/sql/` and applied by hand in the Supabase SQL Editor; when they add tables,

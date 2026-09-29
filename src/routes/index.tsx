@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { z } from "zod";
+import { bookingSchema } from "@/lib/booking-schema";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ADDRESS,
@@ -292,19 +292,6 @@ function BeforeAfter({ before, after, label }: { before: string; after: string; 
     </figure>
   );
 }
-
-const bookingSchema = z.object({
-  name: z.string().trim().min(2, "Укажите имя (минимум 2 символа)").max(80, "Имя слишком длинное"),
-  phone: z
-    .string()
-    .trim()
-    .min(10, "Укажите корректный номер телефона")
-    .max(20, "Номер слишком длинный")
-    .regex(/^[\d+()\-\s]+$/, "Номер может содержать только цифры и знаки + ( ) -"),
-  car: z.string().trim().max(80, "Слишком длинное название авто"),
-  service: z.string().trim().min(1).max(120),
-  date: z.string().trim().max(20),
-});
 
 function BookingForm() {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
