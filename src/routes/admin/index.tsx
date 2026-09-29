@@ -9,11 +9,13 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 import { bookingSchema } from "@/lib/booking-schema";
 import {
+  BOOKING_SOURCES,
   BOOKING_STATUSES,
   MANUAL_BOOKING_SOURCES,
   bookingSourceLabel,
   bookingStatusLabel,
 } from "@/lib/crm-config";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,7 +46,8 @@ type Booking = Tables<"bookings">;
 const BOOKINGS_KEY = ["admin", "bookings"];
 
 function BookingsPage() {
-  const [filter, setFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sourceFilter, setSourceFilter] = useState<string>("all");
 
   const bookings = useQuery({
     queryKey: BOOKINGS_KEY,
@@ -72,8 +75,11 @@ function BookingsPage() {
   }
 
   const all = bookings.data;
-  const countBy = (status: string) => all.filter((b) => b.status === status).length;
-  const visible = filter === "all" ? all : all.filter((b) => b.status === filter);
+  // Each row's counts follow the other row's filter, so a chip's number matches the list
+  // it shows.
+  const bySource = sourceFilter === "all" ? all : all.filter((b) => b.source === sourceFilter);
+  const byStatus = statusFilter === "all" ? all : all.filter((b) => b.status === statusFilter);
+  const visible = bySource.filter((b) => statusFilter === "all" || b.status === statusFilter);
 
   return (
     <div className="space-y-6">
@@ -87,15 +93,23 @@ function BookingsPage() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <FilterChip active={filter === "all"} onClick={() => setFilter("all")}>
-          Все · {all.length}
-        </FilterChip>
-        {BOOKING_STATUSES.map((s) => (
-          <FilterChip key={s.value} active={filter === s.value} onClick={() => setFilter(s.value)}>
-            {s.label} · {countBy(s.value)}
-          </FilterChip>
-        ))}
+      <div className="space-y-3">
+        <FilterRow
+          label="Статус"
+          options={BOOKING_STATUSES}
+          value={statusFilter}
+          onChange={setStatusFilter}
+          items={bySource}
+          field="status"
+        />
+        <FilterRow
+          label="Источник"
+          options={BOOKING_SOURCES}
+          value={sourceFilter}
+          onChange={setSourceFilter}
+          items={byStatus}
+          field="source"
+        />
       </div>
 
       {visible.length === 0 ? (
@@ -107,6 +121,36 @@ function BookingsPage() {
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+function FilterRow({
+  label,
+  options,
+  value,
+  onChange,
+  items,
+  field,
+}: {
+  label: string;
+  options: readonly { value: string; label: string }[];
+  value: string;
+  onChange: (value: string) => void;
+  items: Booking[];
+  field: "status" | "source";
+}) {
+  return (
+    <div role="group" aria-label={label} className="flex flex-wrap items-center gap-2">
+      <span className="w-20 text-sm text-muted-foreground">{label}</span>
+      <FilterChip active={value === "all"} onClick={() => onChange("all")}>
+        Все · {items.length}
+      </FilterChip>
+      {options.map((o) => (
+        <FilterChip key={o.value} active={value === o.value} onClick={() => onChange(o.value)}>
+          {o.label} · {items.filter((b) => b[field] === o.value).length}
+        </FilterChip>
+      ))}
     </div>
   );
 }
@@ -344,9 +388,15 @@ function BookingCard({ booking: b }: { booking: Booking }) {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
           <p className="text-xs text-muted-foreground">
-            {formatDate(b.created_at, "d MMMM yyyy, HH:mm")} · {bookingSourceLabel(b.source)}
+            {formatDate(b.created_at, "d MMMM yyyy, HH:mm")}
           </p>
-          <p className="text-lg font-semibold">{b.name}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-lg font-semibold">{b.name}</p>
+            {/* Site bookings are the usual case; manual ones stand out. */}
+            <Badge variant={b.source === "site" ? "outline" : "default"}>
+              {bookingSourceLabel(b.source)}
+            </Badge>
+          </div>
           <p className="flex flex-wrap gap-x-3 text-sm">
             <a href={`tel:+${phoneDigits(b.phone)}`} className="text-primary hover:underline">
               {b.phone}
