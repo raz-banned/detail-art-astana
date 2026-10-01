@@ -14,6 +14,7 @@ import {
   MANUAL_BOOKING_SOURCES,
   bookingSourceLabel,
   bookingStatusLabel,
+  clientStatusMessage,
 } from "@/lib/crm-config";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -382,6 +383,7 @@ function BookingCard({ booking: b }: { booking: Booking }) {
   const statusOptions = BOOKING_STATUSES.some((s) => s.value === b.status)
     ? BOOKING_STATUSES
     : [...BOOKING_STATUSES, { value: b.status, label: b.status }];
+  const clientMessage = clientStatusMessage(b.status, b);
 
   return (
     <li className="rounded-lg border border-border p-4">
@@ -402,7 +404,7 @@ function BookingCard({ booking: b }: { booking: Booking }) {
               {b.phone}
             </a>
             <a
-              href={`https://wa.me/${phoneDigits(b.phone)}`}
+              href={whatsappUrl(b.phone)}
               target="_blank"
               rel="noreferrer"
               className="text-muted-foreground hover:text-primary"
@@ -417,7 +419,29 @@ function BookingCard({ booking: b }: { booking: Booking }) {
           onValueChange={(status) =>
             update.mutate(
               { id: b.id, patch: { status } },
-              { onSuccess: () => toast.success(`Статус: ${bookingStatusLabel(status)}`) },
+              {
+                onSuccess: () => {
+                  const message = clientStatusMessage(status, b);
+                  // Opened from the toast's button click, so popup blockers let it through.
+                  toast.success(
+                    `Статус: ${bookingStatusLabel(status)}`,
+                    message
+                      ? {
+                          duration: 15000,
+                          action: {
+                            label: "Написать клиенту",
+                            onClick: () =>
+                              window.open(
+                                whatsappUrl(b.phone, message),
+                                "_blank",
+                                "noopener,noreferrer",
+                              ),
+                          },
+                        }
+                      : undefined,
+                  );
+                },
+              },
             )
           }
         >
@@ -433,6 +457,14 @@ function BookingCard({ booking: b }: { booking: Booking }) {
           </SelectContent>
         </Select>
       </div>
+
+      {clientMessage && (
+        <Button asChild size="sm" variant="outline" className="mt-3">
+          <a href={whatsappUrl(b.phone, clientMessage)} target="_blank" rel="noreferrer">
+            Сообщить клиенту в WhatsApp: {bookingStatusLabel(b.status).toLowerCase()}
+          </a>
+        </Button>
+      )}
 
       <dl className="mt-3 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-3">
         <Field label="Услуга">{b.service}</Field>
@@ -496,4 +528,9 @@ function phoneDigits(phone: string): string {
   if (digits.length === 11 && digits.startsWith("8")) return `7${digits.slice(1)}`;
   if (digits.length === 10) return `7${digits}`;
   return digits;
+}
+
+function whatsappUrl(phone: string, text?: string): string {
+  const url = `https://wa.me/${phoneDigits(phone)}`;
+  return text ? `${url}?text=${encodeURIComponent(text)}` : url;
 }

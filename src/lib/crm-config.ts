@@ -1,6 +1,8 @@
 // CRM (/admin) settings that the business hasn't confirmed yet.
 // Everything here is a draft: edit these lists instead of the admin components.
 
+import { ADDRESS } from "./business-info";
+
 // TODO: подтвердить у компании список статусов заявки и их порядок.
 // `value` is stored in bookings.status as plain text, so adding or reordering is safe.
 // Renaming a `value` that is already in use needs one SQL update of existing rows.
@@ -9,6 +11,7 @@ export const BOOKING_STATUSES = [
   { value: "new", label: "Новая" },
   { value: "in_progress", label: "В работе" },
   { value: "scheduled", label: "Записан" },
+  { value: "ready_for_pickup", label: "Готов к выдаче" },
   { value: "done", label: "Выполнена" },
   { value: "cancelled", label: "Отказ" },
 ] as const;
@@ -16,6 +19,28 @@ export const BOOKING_STATUSES = [
 export function bookingStatusLabel(value: string): string {
   // Unknown values (e.g. a status removed from the list) are shown as-is, not hidden.
   return BOOKING_STATUSES.find((s) => s.value === value)?.label ?? value;
+}
+
+// TODO: согласовать тексты с владельцем.
+// WhatsApp message to the client for a status. The CRM offers to send it when a manager
+// sets the status; the manager still presses "Send" in WhatsApp, nothing goes out on its own.
+const CLIENT_STATUS_MESSAGES: Partial<
+  Record<string, (b: { name: string; car: string | null }) => string>
+> = {
+  ready_for_pickup: (b) =>
+    [
+      `Здравствуйте, ${b.name}!`,
+      `Ваш автомобиль${b.car ? ` ${b.car}` : ""} готов к выдаче.`,
+      `Ждём вас по адресу: ${ADDRESS}.`,
+      "APELSIN DETAILING",
+    ].join("\n"),
+};
+
+export function clientStatusMessage(
+  status: string,
+  booking: { name: string; car: string | null },
+): string | null {
+  return CLIENT_STATUS_MESSAGES[status]?.(booking) ?? null;
 }
 
 // TODO: подтвердить у компании список источников заявки.
