@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { bookingSchema } from "@/lib/booking-schema";
 import { supabase } from "@/integrations/supabase/client";
+import { GOALS, reachGoal } from "@/lib/analytics";
 import {
   ADDRESS,
   HOURS,
@@ -356,6 +357,7 @@ function BookingForm() {
     if (whatsappWindow) whatsappWindow.location.href = url;
     else window.open(url, "_blank", "noopener,noreferrer");
 
+    reachGoal(GOALS.bookingSubmit);
     setStatus("sent");
   };
 
@@ -691,6 +693,7 @@ function Index() {
             </a>
             <a
               href={WHATSAPP}
+              onClick={() => reachGoal(GOALS.whatsappClick)}
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-2 rounded-md border border-border px-8 py-4 text-sm font-semibold tracking-widest uppercase transition-colors hover:border-primary hover:text-primary"
@@ -917,7 +920,11 @@ function Index() {
               </li>
               <li className="flex gap-3">
                 <Phone className="h-5 w-5 shrink-0 text-primary" />
-                <a href={PHONE_HREF} className="hover:text-primary">
+                <a
+                  href={PHONE_HREF}
+                  onClick={() => reachGoal(GOALS.phoneClick)}
+                  className="hover:text-primary"
+                >
                   {PHONE}
                 </a>
               </li>
@@ -1000,13 +1007,23 @@ function Index() {
               </li>
               <li className="flex gap-2">
                 <Phone className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                <a href={PHONE_HREF} className="hover:text-primary">
+                <a
+                  href={PHONE_HREF}
+                  onClick={() => reachGoal(GOALS.phoneClick)}
+                  className="hover:text-primary"
+                >
                   {PHONE}
                 </a>
               </li>
               <li className="flex gap-2">
                 <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                <a href={WHATSAPP} target="_blank" rel="noreferrer" className="hover:text-primary">
+                <a
+                  href={WHATSAPP}
+                  onClick={() => reachGoal(GOALS.whatsappClick)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-primary"
+                >
                   WhatsApp
                 </a>
               </li>
@@ -1044,6 +1061,7 @@ function Index() {
 
       <a
         href={WHATSAPP}
+        onClick={() => reachGoal(GOALS.whatsappClick)}
         target="_blank"
         rel="noreferrer"
         aria-label="Написать в WhatsApp"

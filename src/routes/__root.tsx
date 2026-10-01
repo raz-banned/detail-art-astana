@@ -6,11 +6,14 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  useLocation,
+  useRouterState,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { YM_COUNTER_ID, isAdminPath, metrikaSnippet, trackPageView } from "../lib/analytics";
 
 function NotFoundComponent() {
   return (
@@ -100,10 +103,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  // Decided once from the URL the document was loaded at (same on SSR and hydration), so
+  // client navigation never adds or removes the script. Metrika can't be unloaded after init,
+  // so the staff CRM, opened by a full page load, never gets it.
+  const [loadMetrika] = useState(() => YM_COUNTER_ID !== null && !isAdminPath(pathname));
+
   return (
     <html lang="ru">
       <head>
         <HeadContent />
+        {loadMetrika && YM_COUNTER_ID !== null && (
+          <script dangerouslySetInnerHTML={{ __html: metrikaSnippet(YM_COUNTER_ID) }} />
+        )}
       </head>
       <body>
         {children}
@@ -120,6 +132,27 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <MetrikaPageViews />
     </QueryClientProvider>
   );
+}
+
+// Sends a Metrika page view for the first load and for every client-side navigation.
+function MetrikaPageViews() {
+  const pathname = useLocation({ select: (l) => l.pathname });
+  const prevUrl = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (isAdminPath(pathname)) return;
+
+    const { origin, pathname: path, search } = window.location;
+    const url = origin + path + search;
+    // The same URL twice in a row is StrictMode's dev double-run, not a new view.
+    if (url === prevUrl.current) return;
+
+    trackPageView(url, prevUrl.current ?? document.referrer);
+    prevUrl.current = url;
+  }, [pathname]);
+
+  return null;
 }
