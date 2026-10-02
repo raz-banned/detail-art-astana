@@ -639,18 +639,22 @@ function Index() {
           ))}
         </nav>
         <div className="flex flex-col gap-1 border-t border-border pt-6 text-lg">
-          {["Грузовые", "Мото"].map((label) => (
-            <span
-              key={label}
-              aria-disabled="true"
-              className="flex items-center justify-between rounded-md px-3 py-3 text-muted-foreground"
-            >
-              {label}
-              <span className="rounded-full border border-border px-2 py-0.5 text-[10px] tracking-wider uppercase">
-                скоро
-              </span>
+          <Link
+            to="/trucks"
+            onClick={() => setMenuOpen(false)}
+            className="flex items-center justify-between rounded-md px-3 py-3 transition-colors hover:bg-graphite hover:text-primary"
+          >
+            Грузовые
+          </Link>
+          <span
+            aria-disabled="true"
+            className="flex items-center justify-between rounded-md px-3 py-3 text-muted-foreground"
+          >
+            Мото
+            <span className="rounded-full border border-border px-2 py-0.5 text-[10px] tracking-wider uppercase">
+              скоро
             </span>
-          ))}
+          </span>
         </div>
       </div>
 
