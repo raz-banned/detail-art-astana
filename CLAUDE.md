@@ -48,9 +48,16 @@ file-based routing conventions (dynamic `$id`, optional `{-$category}`, splat `$
 The entire homepage (hero, services, pricing, before/after gallery, reviews, about, booking form,
 map, footer) lives in one file: `src/routes/index.tsx`. There are no separate section/page
 components — content arrays (`services`, `pricing`, `reviews`) and the `BookingForm` /
-`BeforeAfter` components are defined inline in that file. The other public page is
-`src/routes/privacy.tsx` (privacy policy for the booking form's personal data); `/admin` is the
-staff CRM (see below).
+`BeforeAfter` components are defined inline in that file. Other public pages are
+`src/routes/privacy.tsx` (privacy policy for the booking form's personal data),
+`src/routes/trucks.tsx` (truck repair, linked from the burger menu) and
+`src/routes/services/$slug.tsx` (one page per service, content in `src/lib/services.ts`);
+`/admin` is the staff CRM (see below).
+
+**Site header**: `src/components/site-header.tsx` (logo, section nav with the services dropdown,
+burger menu) is rendered once by `__root.tsx` for every route except `/admin`, so new pages get
+it automatically — don't add a page-level header. Its links use absolute `/#section` hashes so
+they work from any page.
 
 **Business info**: `src/lib/business-info.ts` is the single source for contact and location data —
 phone, WhatsApp link, address, working hours, 2GIS widget/org id, route links, social links and the
