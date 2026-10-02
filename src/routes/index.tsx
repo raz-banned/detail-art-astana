@@ -182,11 +182,30 @@ const services = [
   },
 ];
 
-const pricing = [
+// TODO: подтвердить у владельца. `value: null` hides the stat; only confirmed numbers go here.
+const heroStats: { value: string | null; label: string }[] = [
+  { value: null, label: "авто в год" },
+  { value: null, label: "на рынке" },
+  { value: null, label: "гарантия керамики" },
+  { value: null, label: "рейтинг 2GIS" },
+];
+const filteredHeroStats = heroStats.filter(
+  (s): s is { value: string; label: string } => s.value !== null,
+);
+
+// TODO: подтвердить у владельца пакеты, состав и цены. `price` / `time` stay null until then:
+// the card shows "Цена по запросу" and no duration.
+const pricing: {
+  name: string;
+  price: string | null;
+  time: string | null;
+  popular?: boolean;
+  features: string[];
+}[] = [
   {
     name: "Экспресс",
-    price: "25 000 ₸",
-    time: "3–4 часа",
+    price: null,
+    time: null,
     features: [
       "Двухфазная мойка кузова",
       "Обезжиривание и защитный воск",
@@ -196,8 +215,8 @@ const pricing = [
   },
   {
     name: "Керамика 9H",
-    price: "180 000 ₸",
-    time: "2 дня",
+    price: null,
+    time: null,
     popular: true,
     features: [
       "Абразивная полировка в 2 шага",
@@ -209,8 +228,8 @@ const pricing = [
   },
   {
     name: "Салон под ноль",
-    price: "70 000 ₸",
-    time: "1 день",
+    price: null,
+    time: null,
     features: [
       "Разбор и химчистка всех поверхностей",
       "Экстрактор + пароочиститель",
@@ -701,21 +720,21 @@ function Index() {
               <MessageCircle className="h-4 w-4" /> WhatsApp
             </a>
           </div>
-          <dl
-            className={`mt-14 grid max-w-2xl grid-cols-2 gap-6 sm:grid-cols-4 ${ready ? "animate-[fade-in-up_0.6s_ease_both] [animation-delay:300ms]" : "opacity-0"}`}
-          >
-            {[
-              ["1 200+", "авто в год"],
-              ["9 лет", "на рынке"],
-              ["3 года", "гарантия керамики"],
-              ["4.9", "рейтинг 2GIS"],
-            ].map(([v, l]) => (
-              <div key={l}>
-                <dt className="font-display text-3xl text-primary">{v}</dt>
-                <dd className="text-xs tracking-wider text-muted-foreground uppercase">{l}</dd>
-              </div>
-            ))}
-          </dl>
+
+          {filteredHeroStats.length > 0 && (
+            <dl
+              className={`mt-14 grid max-w-2xl grid-cols-2 gap-6 sm:grid-cols-4 ${ready ? "animate-[fade-in-up_0.6s_ease_both] [animation-delay:300ms]" : "opacity-0"}`}
+            >
+              {filteredHeroStats.map(({ value, label }) => (
+                <div key={label}>
+                  <dt className="font-display text-3xl text-primary">{value}</dt>
+                  <dd className="text-xs tracking-wider text-muted-foreground uppercase">
+                    {label}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          )}
         </div>
       </section>
 
@@ -753,8 +772,8 @@ function Index() {
           <p className="eyebrow">Цены</p>
           <h2 className="mt-3 text-4xl sm:text-5xl">Пакеты и стоимость</h2>
           <p className="mt-3 max-w-xl text-sm text-muted-foreground">
-            Цены указаны для седанов. Для кроссоверов и внедорожников +15–25%. Точную смету считаем
-            после осмотра лака толщиномером.
+            Прайс уточняется. Стоимость зависит от автомобиля и его состояния — назовём её после
+            осмотра.
           </p>
           <div className="mt-12 grid gap-5 lg:grid-cols-3">
             {pricing.map((p) => (
@@ -768,10 +787,14 @@ function Index() {
                   </span>
                 )}
                 <h3 className="text-3xl">{p.name}</h3>
-                <p className="mt-2 flex items-center gap-2 text-xs tracking-wider text-muted-foreground uppercase">
-                  <Clock className="h-3.5 w-3.5" /> {p.time}
+                {p.time && (
+                  <p className="mt-2 flex items-center gap-2 text-xs tracking-wider text-muted-foreground uppercase">
+                    <Clock className="h-3.5 w-3.5" /> {p.time}
+                  </p>
+                )}
+                <p className="font-display mt-5 text-4xl text-primary">
+                  {p.price ?? "Цена по запросу"}
                 </p>
-                <p className="font-display mt-5 text-4xl text-primary">{p.price}</p>
                 <ul className="mt-6 mb-6 space-y-3 text-sm">
                   {p.features.map((f) => (
                     <li key={f} className="flex gap-2 text-muted-foreground">
