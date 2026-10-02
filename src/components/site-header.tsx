@@ -190,15 +190,13 @@ export function SiteHeader() {
           >
             Грузовые
           </Link>
-          <span
-            aria-disabled="true"
-            className="flex items-center justify-between rounded-md px-3 py-3 text-muted-foreground"
+          <Link
+            to="/moto"
+            onClick={() => setMenuOpen(false)}
+            className="flex items-center justify-between rounded-md px-3 py-3 transition-colors hover:bg-graphite hover:text-primary"
           >
             Мото
-            <span className="rounded-full border border-border px-2 py-0.5 text-[10px] tracking-wider uppercase">
-              скоро
-            </span>
-          </span>
+          </Link>
         </div>
       </div>
     </>

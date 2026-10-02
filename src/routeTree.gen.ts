@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as MotoRouteImport } from './routes/moto'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as TrucksRouteImport } from './routes/trucks'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MotoRoute = MotoRouteImport.update({
+  id: '/moto',
+  path: '/moto',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -50,6 +56,7 @@ const ServicesSlugRoute = ServicesSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/moto': typeof MotoRoute
   '/privacy': typeof PrivacyRoute
   '/trucks': typeof TrucksRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -57,6 +64,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/moto': typeof MotoRoute
   '/privacy': typeof PrivacyRoute
   '/trucks': typeof TrucksRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -66,6 +74,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/moto': typeof MotoRoute
   '/privacy': typeof PrivacyRoute
   '/trucks': typeof TrucksRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -74,13 +83,20 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/admin' | '/privacy' | '/trucks' | '/services/$slug' | '/admin/'
+    | '/'
+    | '/admin'
+    | '/moto'
+    | '/privacy'
+    | '/trucks'
+    | '/services/$slug'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/privacy' | '/trucks' | '/services/$slug' | '/admin'
+  to: '/' | '/moto' | '/privacy' | '/trucks' | '/services/$slug' | '/admin'
   id:
     | '__root__'
     | '/'
     | '/admin'
+    | '/moto'
     | '/privacy'
     | '/trucks'
     | '/services/$slug'
@@ -90,6 +106,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  MotoRoute: typeof MotoRoute
   PrivacyRoute: typeof PrivacyRoute
   TrucksRoute: typeof TrucksRoute
   ServicesSlugRoute: typeof ServicesSlugRoute
@@ -109,6 +126,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/moto': {
+      id: '/moto'
+      path: '/moto'
+      fullPath: '/moto'
+      preLoaderRoute: typeof MotoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -155,6 +179,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  MotoRoute: MotoRoute,
   PrivacyRoute: PrivacyRoute,
   TrucksRoute: TrucksRoute,
   ServicesSlugRoute: ServicesSlugRoute,
