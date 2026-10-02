@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { PHONE } from "@/lib/business-info";
 
 export const Route = createFileRoute("/privacy")({
@@ -18,17 +18,6 @@ export const Route = createFileRoute("/privacy")({
 function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-6">
-          <Link to="/" className="font-display text-xl tracking-widest">
-            APELSIN<span className="text-primary">.</span>DETAILING
-          </Link>
-          <Link to="/" className="text-sm text-muted-foreground hover:text-primary">
-            На главную
-          </Link>
-        </div>
-      </header>
-
       <main className="mx-auto max-w-3xl px-4 py-16">
         <p className="eyebrow">Документ</p>
         <h1 className="mt-3 text-4xl sm:text-5xl">Политика конфиденциальности</h1>
