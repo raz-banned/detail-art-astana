@@ -197,6 +197,13 @@ export function SiteHeader() {
           >
             Мото
           </Link>
+          <Link
+            to="/metal-workshop"
+            onClick={() => setMenuOpen(false)}
+            className="flex items-center justify-between rounded-md px-3 py-3 transition-colors hover:bg-graphite hover:text-primary"
+          >
+            Металлоконструкции
+          </Link>
         </div>
       </div>
     </>
