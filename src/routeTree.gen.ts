@@ -14,6 +14,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as MetalWorkshopRouteImport } from './routes/metal-workshop'
 import { Route as MotoRouteImport } from './routes/moto'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as SprinterTuningRouteImport } from './routes/sprinter-tuning'
 import { Route as TrucksRouteImport } from './routes/trucks'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ServicesSlugRouteImport } from './routes/services/$slug'
@@ -43,6 +44,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SprinterTuningRoute = SprinterTuningRouteImport.update({
+  id: '/sprinter-tuning',
+  path: '/sprinter-tuning',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TrucksRoute = TrucksRouteImport.update({
   id: '/trucks',
   path: '/trucks',
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/metal-workshop': typeof MetalWorkshopRoute
   '/moto': typeof MotoRoute
   '/privacy': typeof PrivacyRoute
+  '/sprinter-tuning': typeof SprinterTuningRoute
   '/trucks': typeof TrucksRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/metal-workshop': typeof MetalWorkshopRoute
   '/moto': typeof MotoRoute
   '/privacy': typeof PrivacyRoute
+  '/sprinter-tuning': typeof SprinterTuningRoute
   '/trucks': typeof TrucksRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin': typeof AdminIndexRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/metal-workshop': typeof MetalWorkshopRoute
   '/moto': typeof MotoRoute
   '/privacy': typeof PrivacyRoute
+  '/sprinter-tuning': typeof SprinterTuningRoute
   '/trucks': typeof TrucksRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/metal-workshop'
     | '/moto'
     | '/privacy'
+    | '/sprinter-tuning'
     | '/trucks'
     | '/services/$slug'
     | '/admin/'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/metal-workshop'
     | '/moto'
     | '/privacy'
+    | '/sprinter-tuning'
     | '/trucks'
     | '/services/$slug'
     | '/admin'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/metal-workshop'
     | '/moto'
     | '/privacy'
+    | '/sprinter-tuning'
     | '/trucks'
     | '/services/$slug'
     | '/admin/'
@@ -127,6 +139,7 @@ export interface RootRouteChildren {
   MetalWorkshopRoute: typeof MetalWorkshopRoute
   MotoRoute: typeof MotoRoute
   PrivacyRoute: typeof PrivacyRoute
+  SprinterTuningRoute: typeof SprinterTuningRoute
   TrucksRoute: typeof TrucksRoute
   ServicesSlugRoute: typeof ServicesSlugRoute
 }
@@ -166,6 +179,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sprinter-tuning': {
+      id: '/sprinter-tuning'
+      path: '/sprinter-tuning'
+      fullPath: '/sprinter-tuning'
+      preLoaderRoute: typeof SprinterTuningRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/trucks': {
@@ -208,6 +228,7 @@ const rootRouteChildren: RootRouteChildren = {
   MetalWorkshopRoute: MetalWorkshopRoute,
   MotoRoute: MotoRoute,
   PrivacyRoute: PrivacyRoute,
+  SprinterTuningRoute: SprinterTuningRoute,
   TrucksRoute: TrucksRoute,
   ServicesSlugRoute: ServicesSlugRoute,
 }

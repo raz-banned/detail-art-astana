@@ -50,8 +50,9 @@ map, footer) lives in one file: `src/routes/index.tsx`. There are no separate se
 components — content arrays (`services`, `pricing`, `reviews`) and the `BookingForm` /
 `BeforeAfter` components are defined inline in that file. Other public pages are
 `src/routes/privacy.tsx` (privacy policy for the booking form's personal data),
-`src/routes/trucks.tsx` (truck repair), `src/routes/moto.tsx` (motorcycle detailing) and
-`src/routes/metal-workshop.tsx` (metal fabrication workshop), all linked from the burger menu, and
+`src/routes/trucks.tsx` (truck repair), `src/routes/moto.tsx` (motorcycle detailing),
+`src/routes/metal-workshop.tsx` (metal fabrication workshop) and `src/routes/sprinter-tuning.tsx`
+(Sprinter van conversions), all linked from the burger menu, and
 `src/routes/services/$slug.tsx` (one page per service, content in `src/lib/services.ts`);
 `/admin` is the staff CRM (see below).
 

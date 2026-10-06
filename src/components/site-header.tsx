@@ -204,6 +204,13 @@ export function SiteHeader() {
           >
             Металлоконструкции
           </Link>
+          <Link
+            to="/sprinter-tuning"
+            onClick={() => setMenuOpen(false)}
+            className="flex items-center justify-between rounded-md px-3 py-3 transition-colors hover:bg-graphite hover:text-primary"
+          >
+            Тюнинг Sprinter
+          </Link>
         </div>
       </div>
     </>
