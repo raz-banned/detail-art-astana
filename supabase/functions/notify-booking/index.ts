@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
   }
 
   const lines = [
-    "🚗 Новая заявка с сайта APELSIN DETAILING",
+    "🚗 Новая заявка с сайта APELSIN INDUSTRIAL",
     `Имя: ${record.name}`,
     `Телефон: ${record.phone}`,
     record.car ? `Авто: ${record.car}` : null,

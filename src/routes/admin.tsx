@@ -14,7 +14,7 @@ import { Toaster } from "@/components/ui/sonner";
 export const Route = createFileRoute("/admin")({
   ssr: false,
   head: () => ({
-    meta: [{ title: "CRM — APELSIN DETAILING" }, { name: "robots", content: "noindex, nofollow" }],
+    meta: [{ title: "CRM — APELSIN INDUSTRIAL" }, { name: "robots", content: "noindex, nofollow" }],
   }),
   component: AdminLayout,
 });

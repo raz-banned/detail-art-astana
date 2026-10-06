@@ -1,3 +1,7 @@
+// Production origin, no trailing slash. Canonical, og:url, sitemap.xml and robots.txt are built
+// from it, so preview/Lovable domains all point search engines at the real site.
+export const SITE_URL = "https://apelsin-industrial.kz";
+
 export const MANAGER_PHONE = "77084254181";
 export const PHONE = "+7 708 425 4181";
 export const PHONE_HREF = `tel:${PHONE.replace(/\s/g, "")}`;
