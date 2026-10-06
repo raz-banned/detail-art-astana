@@ -42,31 +42,18 @@ import afterPaint from "@/assets/after-paint.jpg";
 import beforeInterior from "@/assets/before-interior.jpg";
 import afterInterior from "@/assets/after-interior.jpg";
 import parkAsset from "@/assets/apelsin-park.jpg.asset.json";
+import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "APELSIN DETAILING — детейлинг авто, фур и мото в Астане" },
-      {
-        name: "description",
-        content:
-          "APELSIN Industrial Park, Астана, Алаш 46/2: детейлинг легковых машин, грузовых фур и мотоциклов — полировка, керамика, химчистка, защитные плёнки.",
-      },
-      {
-        property: "og:title",
-        content: "APELSIN DETAILING — детейлинг авто, фур и мото в Астане",
-      },
-      {
-        property: "og:description",
-        content:
-          "Детейлинг легковых авто, грузовых фур и мотоциклов в Астане: керамика, полировка, химчистка. Фото до/после, цены и запись онлайн.",
-      },
-      { property: "og:type", content: "website" },
-      { property: "og:locale", content: "ru_RU" },
-      { property: "og:site_name", content: "APELSIN DETAILING" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () =>
+    seoHead({
+      path: "/",
+      title: "APELSIN INDUSTRIAL — детейлинг авто, фур и мото в Астане",
+      description:
+        "APELSIN Industrial Park, Астана, Алаш 46/2: детейлинг легковых машин, грузовых фур и мотоциклов — полировка, керамика, химчистка, защитные плёнки.",
+      ogDescription:
+        "Детейлинг легковых авто, грузовых фур и мотоциклов в Астане: керамика, полировка, химчистка. Фото до/после, цены и запись онлайн.",
+    }),
   component: Index,
 });
 
@@ -137,7 +124,7 @@ function Preloader({ onDone }: { onDone: () => void }) {
     >
       <img
         src={apelsinLogo}
-        alt="APELSIN DETAILING"
+        alt="APELSIN INDUSTRIAL"
         className="h-16 w-16 animate-spin rounded-full object-cover [animation-duration:1.4s]"
       />
     </div>
@@ -364,7 +351,7 @@ function BookingForm() {
     }
 
     const lines = [
-      "Новая заявка с сайта APELSIN DETAILING",
+      "Новая заявка с сайта APELSIN INDUSTRIAL",
       `Имя: ${d.name}`,
       `Телефон: ${d.phone}`,
       d.car ? `Авто: ${d.car}` : null,
@@ -537,7 +524,7 @@ function Index() {
             href="#top"
             className={`font-display text-2xl tracking-widest ${ready ? "animate-[fade-in-up_0.6s_ease_both]" : "opacity-0"}`}
           >
-            APELSIN<span className="text-primary">.</span>DETAILING
+            APELSIN<span className="text-primary">.</span>INDUSTRIAL
           </a>
           <nav className="hidden gap-20 text-sm font-normal whitespace-nowrap text-muted-foreground lg:flex">
             {nav.map(([label, href]) =>
@@ -700,9 +687,9 @@ function Index() {
           <p
             className={`mt-6 max-w-xl text-lg text-muted-foreground ${ready ? "animate-[fade-in-up_0.6s_ease_both] [animation-delay:180ms]" : "opacity-0"}`}
           >
-            APELSIN DETAILING — часть Apelsin Industrial Park. Керамика, полировка, химчистка и
-            защитные плёнки в тёплых боксах: принимаем и седаны, и тягачи с прицепами. Совершенство
-            в каждой детали.
+            APELSIN INDUSTRIAL — детейлинг-центр в Астане. Керамика, полировка, химчистка и защитные
+            плёнки в тёплых боксах: принимаем и седаны, и тягачи с прицепами. Совершенство в каждой
+            детали.
           </p>
           <div
             className={`mt-9 flex flex-wrap gap-3 ${ready ? "animate-[fade-in-up_0.6s_ease_both] [animation-delay:240ms]" : "opacity-0"}`}
@@ -967,7 +954,7 @@ function Index() {
           <h2 className="mt-3 text-4xl sm:text-5xl">Как нас найти</h2>
           <div className="surface-panel mt-10 overflow-hidden rounded-lg">
             <iframe
-              title="Карта 2GIS — APELSIN DETAILING, Астана"
+              title="Карта 2GIS — APELSIN INDUSTRIAL, Астана"
               src={TWO_GIS_WIDGET}
               className="h-[420px] w-full border-0"
               loading="lazy"
@@ -997,7 +984,7 @@ function Index() {
         <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr]">
           <div>
             <p className="font-display text-xl tracking-widest">
-              APELSIN<span className="text-primary">.</span>DETAILING
+              APELSIN<span className="text-primary">.</span>INDUSTRIAL
             </p>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
               Детейлинг легковых авто, грузовых фур и мотоциклов в Apelsin Industrial Park.

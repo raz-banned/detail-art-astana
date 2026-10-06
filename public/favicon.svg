@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -7.5 98 98">
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFA00A"/>
+      <stop offset="0.55" stop-color="#FF6A16"/>
+      <stop offset="1" stop-color="#FF451B"/>
+    </linearGradient>
+    <linearGradient id="peel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFB80C"/>
+      <stop offset="0.5" stop-color="#FF8A12"/>
+      <stop offset="1" stop-color="#FF5A18"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#00A84A"/>
+      <stop offset="1" stop-color="#0A8F45"/>
+    </linearGradient>
+    <mask id="slit">
+      <rect y="-7.5" width="98" height="98" fill="#fff"/>
+      <path fill="#000" d="M37 27.6 C50 21 66 17 88 16.5 L88 25.2 C74 20 56 21.5 38.5 29 Z"/>
+    </mask>
+  </defs>
+  <path fill="url(#body)" d="M36 63 C40 50 62 32 84 26 C93 32 98 42 97 52 C96 70 82 83 64 82 C47 81 35 74 36 63 Z"/>
+  <path fill="url(#peel)" mask="url(#slit)" d="M26 61 C18 44 26 22 46 15 C58 10 72 12 83 17 L84.5 25 C66 25 50 29 42 35 C34 42 29 50 26 61 Z"/>
+  <path fill="#E8321E" d="M27 58 C30 47 35 38 43 33 C55 27 70 25 83 25 C68 27 54 30 45 35 C37 41 31 49 27 58 Z"/>
+  <path fill="#E8321E" d="M36.5 26.6 C49 19.8 65 15.8 83 16.6 C66 17.4 51 21.2 37.4 27.6 Z"/>
+  <path fill="url(#leaf)" d="M1 16 C8 7 22 3 36 9 C28 15 14 20 1 16 Z"/>
+  <path fill="none" stroke="#fff" stroke-width="1.1" stroke-linecap="round" d="M14 9.5 C20 8 26 8 31 9"/>
+  <path fill="none" stroke="#1E8C4E" stroke-width="1.1" stroke-linecap="round" d="M34 1 C37 4 39 7.5 42 9 C46 10 50 9.5 54 8.5"/>
+</svg>

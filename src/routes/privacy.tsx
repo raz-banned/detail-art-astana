@@ -1,17 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PHONE } from "@/lib/business-info";
+import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/privacy")({
-  head: () => ({
-    meta: [
-      { title: "Политика конфиденциальности — APELSIN DETAILING" },
-      {
-        name: "description",
-        content:
-          "Политика обработки персональных данных APELSIN DETAILING: какие данные собираются через форму заявки и как они используются.",
-      },
-    ],
-  }),
+  head: () =>
+    seoHead({
+      path: "/privacy",
+      title: "Политика конфиденциальности — APELSIN INDUSTRIAL",
+      description:
+        "Политика обработки персональных данных APELSIN INDUSTRIAL: какие данные собираются через форму заявки и как они используются.",
+    }),
   component: PrivacyPolicy,
 });
 
@@ -21,7 +19,7 @@ function PrivacyPolicy() {
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-6">
           <Link to="/" className="font-display text-xl tracking-widest">
-            APELSIN<span className="text-primary">.</span>DETAILING
+            APELSIN<span className="text-primary">.</span>INDUSTRIAL
           </Link>
           <Link to="/" className="text-sm text-muted-foreground hover:text-primary">
             На главную
@@ -33,8 +31,8 @@ function PrivacyPolicy() {
         <p className="eyebrow">Документ</p>
         <h1 className="mt-3 text-4xl sm:text-5xl">Политика конфиденциальности</h1>
         <p className="mt-4 text-sm text-muted-foreground">
-          Действует в отношении данных, которые посетители сайта APELSIN DETAILING указывают в форме
-          заявки на детейлинг.
+          Действует в отношении данных, которые посетители сайта APELSIN INDUSTRIAL указывают в
+          форме заявки на детейлинг.
         </p>
 
         <div className="surface-panel mt-10 space-y-8 rounded-lg p-6 text-sm leading-relaxed text-muted-foreground sm:p-8">

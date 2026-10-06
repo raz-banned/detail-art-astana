@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-APELSIN DETAILING — a single-page marketing site (Russian-language) for a car detailing business in
+APELSIN INDUSTRIAL — a single-page marketing site (Russian-language) for a car detailing business in
 Astana, built with TanStack Start (React 19 + SSR), Tailwind CSS 4, shadcn/ui, and Supabase. The
 project is managed through [Lovable](https://lovable.dev): pushes to `main` sync back into the
 Lovable editor, so keep the branch in a working state and avoid rewriting published history (force

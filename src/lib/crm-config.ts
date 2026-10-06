@@ -32,7 +32,7 @@ const CLIENT_STATUS_MESSAGES: Partial<
       `Здравствуйте, ${b.name}!`,
       `Ваш автомобиль${b.car ? ` ${b.car}` : ""} готов к выдаче.`,
       `Ждём вас по адресу: ${ADDRESS}.`,
-      "APELSIN DETAILING",
+      "APELSIN INDUSTRIAL",
     ].join("\n"),
 };
 
