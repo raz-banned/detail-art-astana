@@ -18,12 +18,15 @@
       <rect y="-7.5" width="98" height="98" fill="#fff"/>
       <path fill="#000" d="M37 27.6 C50 21 66 17 88 16.5 L88 25.2 C74 20 56 21.5 38.5 29 Z"/>
     </mask>
+    <mask id="leafcut">
+      <rect y="-7.5" width="98" height="98" fill="#fff"/>
+      <path fill="#000" d="M15 9.9 C22 9 32 8.9 42 10.1 L42 13.6 C32 11.6 22 11.4 15 11.5 C13.9 11.4 13.9 10 15 9.9 Z"/>
+    </mask>
   </defs>
-  <path fill="url(#body)" d="M36 63 C40 50 62 32 84 26 C93 32 98 42 97 52 C96 70 82 83 64 82 C47 81 35 74 36 63 Z"/>
+  <path fill="url(#body)" d="M36 63 C40 50 62 32 84.6 24.6 C93 31 98 42 97 52 C96 70 82 83 64 82 C47 81 35 74 36 63 Z"/>
   <path fill="url(#peel)" mask="url(#slit)" d="M26 61 C18 44 26 22 46 15 C58 10 72 12 83 17 L84.5 25 C66 25 50 29 42 35 C34 42 29 50 26 61 Z"/>
   <path fill="#E8321E" d="M27 58 C30 47 35 38 43 33 C55 27 70 25 83 25 C68 27 54 30 45 35 C37 41 31 49 27 58 Z"/>
   <path fill="#E8321E" d="M36.5 26.6 C49 19.8 65 15.8 83 16.6 C66 17.4 51 21.2 37.4 27.6 Z"/>
-  <path fill="url(#leaf)" d="M1 16 C8 7 22 3 36 9 C28 15 14 20 1 16 Z"/>
-  <path fill="none" stroke="#fff" stroke-width="1.1" stroke-linecap="round" d="M14 9.5 C20 8 26 8 31 9"/>
+  <path fill="url(#leaf)" mask="url(#leafcut)" d="M0.8 17 C6 7 22 2.5 40.6 8.4 C31 16.5 13 21.5 0.8 17 Z"/>
   <path fill="none" stroke="#1E8C4E" stroke-width="1.1" stroke-linecap="round" d="M34 1 C37 4 39 7.5 42 9 C46 10 50 9.5 54 8.5"/>
 </svg>
