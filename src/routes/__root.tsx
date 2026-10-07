@@ -92,9 +92,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700&display=swap",
       },
-      // .ico (16/32/48) for browsers without SVG favicon support; "sizes: any" keeps Chrome
-      // from preferring it over the SVG.
-      { rel: "icon", href: "/favicon.ico", sizes: "any" },
+      // .ico (16/32/48) for browsers without SVG favicon support. It must not be marked
+      // sizes="any": Chrome then prefers it over the SVG.
+      { rel: "icon", href: "/favicon.ico", sizes: "32x32" },
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
     ],
