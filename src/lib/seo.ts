@@ -2,7 +2,7 @@ import { SITE_URL } from "@/lib/business-info";
 
 // Public pages listed in sitemap.xml. Add a path here when a new public route appears;
 // staff-only routes (/admin) stay out.
-export const SITEMAP_PATHS = ["/", "/privacy"] as const;
+export const SITEMAP_PATHS = ["/", "/detailing", "/privacy"] as const;
 
 export type SitemapPath = (typeof SITEMAP_PATHS)[number];
 
