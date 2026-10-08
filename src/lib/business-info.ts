@@ -20,6 +20,11 @@ export const WHATSAPP = `https://wa.me/${MANAGER_PHONE}?text=${encodeURIComponen
 
 export const LOCATION = { lat: 51.207227, lon: 71.497783 };
 export const TWO_GIS_ID = "70000001116395659";
+export const TWO_GIS_REVIEWS = `https://2gis.kz/astana/firm/${TWO_GIS_ID}/tab/reviews`;
+// Copied by hand from the 2GIS card; `null` hides the rating badge and the hero stat.
+// TWO_GIS_ID is the whole park's card, which matches the homepage. TODO: 2GIS doesn't show a
+// rating for it yet (10 ratings, no average), fill in once the card displays one.
+export const TWO_GIS_RATING: { rating: number; count: number } | null = null;
 
 const TWO_GIS_WIDGET_OPTIONS = {
   pos: { lat: LOCATION.lat, lon: LOCATION.lon, zoom: 16 },
