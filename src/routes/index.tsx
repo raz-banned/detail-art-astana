@@ -12,6 +12,8 @@ import {
   PHONE_HREF,
   ROUTE_LINKS,
   SOCIAL_LINKS,
+  TWO_GIS_RATING,
+  TWO_GIS_REVIEWS,
   TWO_GIS_WIDGET,
   WHATSAPP,
 } from "@/lib/business-info";
@@ -169,12 +171,28 @@ const services = [
   },
 ];
 
+const twoGisRatingText = TWO_GIS_RATING?.rating.toLocaleString("ru-RU", {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+});
+
+const reviewPlural = new Intl.PluralRules("ru-RU");
+const reviewForms: Partial<Record<Intl.LDMLPluralRule, string>> = {
+  one: "отзыв",
+  few: "отзыва",
+  many: "отзывов",
+};
+// "1 отзыв", "3 отзыва", "12 отзывов".
+function reviewCountLabel(count: number) {
+  return `${count} ${reviewForms[reviewPlural.select(count)] ?? "отзывов"}`;
+}
+
 // TODO: подтвердить у владельца. `value: null` hides the stat; only confirmed numbers go here.
 const heroStats: { value: string | null; label: string }[] = [
   { value: null, label: "авто в год" },
   { value: null, label: "на рынке" },
   { value: null, label: "гарантия керамики" },
-  { value: null, label: "рейтинг 2GIS" },
+  { value: twoGisRatingText ?? null, label: "рейтинг 2GIS" },
 ];
 const filteredHeroStats = heroStats.filter(
   (s): s is { value: string; label: string } => s.value !== null,
@@ -869,6 +887,23 @@ function Index() {
               </p>
             </div>
           )}
+          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+            <a
+              href={TWO_GIS_REVIEWS}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-md border border-border px-6 py-3 text-sm font-semibold tracking-widest uppercase transition-colors hover:border-primary hover:text-primary"
+            >
+              <Star className="h-4 w-4" /> Отзывы в 2GIS
+            </a>
+            {TWO_GIS_RATING && (
+              <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Star className="h-4 w-4 fill-current text-primary" />
+                <span className="font-semibold text-foreground">{twoGisRatingText}</span>·{" "}
+                {reviewCountLabel(TWO_GIS_RATING.count)}
+              </p>
+            )}
+          </div>
         </div>
       </section>
 
