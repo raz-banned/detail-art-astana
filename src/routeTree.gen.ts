@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as DetailingRouteImport } from './routes/detailing'
+import { Route as MetalWorkshopRouteImport } from './routes/metal-workshop'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -30,6 +31,11 @@ const AdminRoute = AdminRouteImport.update({
 const DetailingRoute = DetailingRouteImport.update({
   id: '/detailing',
   path: '/detailing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MetalWorkshopRoute = MetalWorkshopRouteImport.update({
+  id: '/metal-workshop',
+  path: '/metal-workshop',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/detailing': typeof DetailingRoute
+  '/metal-workshop': typeof MetalWorkshopRoute
   '/privacy': typeof PrivacyRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -65,6 +72,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/detailing': typeof DetailingRoute
+  '/metal-workshop': typeof MetalWorkshopRoute
   '/privacy': typeof PrivacyRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -75,6 +83,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/detailing': typeof DetailingRoute
+  '/metal-workshop': typeof MetalWorkshopRoute
   '/privacy': typeof PrivacyRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -86,18 +95,26 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/detailing'
+    | '/metal-workshop'
     | '/privacy'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/detailing' | '/privacy' | '/robots.txt' | '/sitemap.xml' | '/admin'
+    | '/'
+    | '/detailing'
+    | '/metal-workshop'
+    | '/privacy'
+    | '/robots.txt'
+    | '/sitemap.xml'
+    | '/admin'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/detailing'
+    | '/metal-workshop'
     | '/privacy'
     | '/robots.txt'
     | '/sitemap.xml'
@@ -108,6 +125,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   DetailingRoute: typeof DetailingRoute
+  MetalWorkshopRoute: typeof MetalWorkshopRoute
   PrivacyRoute: typeof PrivacyRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -134,6 +152,13 @@ declare module '@tanstack/react-router' {
       path: '/detailing'
       fullPath: '/detailing'
       preLoaderRoute: typeof DetailingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/metal-workshop': {
+      id: '/metal-workshop'
+      path: '/metal-workshop'
+      fullPath: '/metal-workshop'
+      preLoaderRoute: typeof MetalWorkshopRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -181,6 +206,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   DetailingRoute: DetailingRoute,
+  MetalWorkshopRoute: MetalWorkshopRoute,
   PrivacyRoute: PrivacyRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,

@@ -2,10 +2,11 @@ import { MessageCircle } from "lucide-react";
 import { GOALS, reachGoal } from "@/lib/analytics";
 import { WHATSAPP } from "@/lib/business-info";
 
-export function WhatsAppFab() {
+// `href` lets a direction page prefill its own first message; the default is park-wide.
+export function WhatsAppFab({ href = WHATSAPP }: { href?: string }) {
   return (
     <a
-      href={WHATSAPP}
+      href={href}
       onClick={() => reachGoal(GOALS.whatsappClick)}
       target="_blank"
       rel="noreferrer"

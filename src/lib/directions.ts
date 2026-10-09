@@ -11,7 +11,7 @@ export type Direction = {
   slug: DirectionSlug;
   title: string;
   services: string[];
-  path: "/detailing" | null;
+  path: "/detailing" | "/metal-workshop" | null;
 };
 
 export function directionTitle(slug: string): string {
@@ -53,6 +53,6 @@ export const DIRECTIONS: Direction[] = [
       "Лазерная резка металла",
       "Здания из металлоконструкций под ключ",
     ],
-    path: null,
+    path: "/metal-workshop",
   },
 ];
