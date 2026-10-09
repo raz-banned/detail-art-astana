@@ -4,7 +4,13 @@ import { SITE_URL } from "@/lib/business-info";
 // staff-only routes (/admin) stay out.
 export const SITEMAP_PATHS = ["/", "/detailing", "/privacy"] as const;
 
+// Pages still showing draft copy the company hasn't confirmed: kept out of the sitemap and
+// marked noindex, so search engines don't pick up services that may be wrong. Move a path to
+// SITEMAP_PATHS once its copy is real.
+export const DRAFT_PATHS = ["/metal-workshop"] as const;
+
 export type SitemapPath = (typeof SITEMAP_PATHS)[number];
+type DraftPath = (typeof DRAFT_PATHS)[number];
 
 export function absoluteUrl(path: string) {
   return path === "/" ? `${SITE_URL}/` : `${SITE_URL}${path}`;
@@ -19,14 +25,20 @@ export function seoHead({
   description,
   ogDescription = description,
 }: {
-  path: SitemapPath;
+  path: SitemapPath | DraftPath;
   title: string;
   description: string;
   ogDescription?: string;
 }) {
   const url = absoluteUrl(path);
+  // One tag only: TanStack Router keeps a single meta per `name`, so a second robots tag would
+  // silently replace the first. No nofollow: the links on a draft page lead to indexed pages.
+  const isDraft = (DRAFT_PATHS as readonly string[]).includes(path);
+  const robots = isDraft ? [{ name: "robots", content: "noindex" }] : [];
+
   return {
     meta: [
+      ...robots,
       { title },
       { name: "description", content: description },
       { property: "og:title", content: title },

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { GOALS, reachGoal } from "@/lib/analytics";
-import { ADDRESS, HOURS, PHONE, PHONE_HREF, WHATSAPP } from "@/lib/business-info";
+import { ADDRESS, DETAILING_WHATSAPP, HOURS, PHONE, PHONE_HREF } from "@/lib/business-info";
 
 import {
   Sparkles,
@@ -325,7 +325,7 @@ function DetailingPage() {
               Запись онлайн
             </a>
             <a
-              href={WHATSAPP}
+              href={DETAILING_WHATSAPP}
               onClick={() => reachGoal(GOALS.whatsappClick)}
               target="_blank"
               rel="noreferrer"
@@ -497,7 +497,7 @@ function DetailingPage() {
 
       <ContactsSection />
       <SiteFooter />
-      <WhatsAppFab />
+      <WhatsAppFab href={DETAILING_WHATSAPP} />
     </div>
   );
 }

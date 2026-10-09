@@ -4,12 +4,13 @@ import { Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { GOALS, reachGoal } from "@/lib/analytics";
 import { bookingSchema } from "@/lib/booking-schema";
-import { MANAGER_PHONE } from "@/lib/business-info";
+import { whatsappUrl } from "@/lib/business-info";
 import { directionTitle, type DirectionSlug } from "@/lib/directions";
 
 // The booking form shared by the direction pages. Each page passes its own direction (stored in
 // bookings.direction, so the CRM can filter by it) and the services offered in the select; with
 // no services the select is hidden and the direction's name is sent as the service.
+// `carPlaceholder={null}` hides the car field for directions that don't work on vehicles.
 export function BookingForm({
   direction,
   services,
@@ -17,7 +18,7 @@ export function BookingForm({
 }: {
   direction: DirectionSlug;
   services: string[];
-  carPlaceholder?: string;
+  carPlaceholder?: string | null;
 }) {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +80,7 @@ export function BookingForm({
       d.date ? `Желаемая дата: ${d.date}` : null,
     ].filter(Boolean);
 
-    const url = `https://wa.me/${MANAGER_PHONE}?text=${encodeURIComponent(lines.join("\n"))}`;
+    const url = whatsappUrl(lines.join("\n"));
     if (whatsappWindow) whatsappWindow.location.href = url;
     else window.open(url, "_blank", "noopener,noreferrer");
 
@@ -123,16 +124,19 @@ export function BookingForm({
           value={form.phone}
           onChange={(e) => setForm({ ...form, phone: e.target.value })}
         />
-        <input
-          maxLength={80}
-          className={field}
-          placeholder={carPlaceholder}
-          value={form.car}
-          onChange={(e) => setForm({ ...form, car: e.target.value })}
-        />
+        {carPlaceholder !== null && (
+          <input
+            maxLength={80}
+            className={field}
+            placeholder={carPlaceholder}
+            value={form.car}
+            onChange={(e) => setForm({ ...form, car: e.target.value })}
+          />
+        )}
         <input
           type="date"
-          className={field}
+          // Alone in its row when the car field is hidden.
+          className={carPlaceholder === null ? `${field} sm:col-span-2` : field}
           value={form.date}
           onChange={(e) => setForm({ ...form, date: e.target.value })}
         />
@@ -159,8 +163,8 @@ export function BookingForm({
           className="mt-0.5 h-4 w-4 shrink-0 rounded border-input accent-primary"
         />
         <span>
-          Я согласен(на) на обработку указанных персональных данных (имя, телефон и данные об авто)
-          в соответствии с{" "}
+          Я согласен(на) на обработку указанных персональных данных (имя, телефон и другие данные из
+          заявки) в соответствии с{" "}
           <Link to="/privacy" className="text-primary hover:underline">
             политикой конфиденциальности
           </Link>{" "}

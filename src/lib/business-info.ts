@@ -22,7 +22,13 @@ export const LEGAL_ENTITY = {
   address: "010000, Казахстан, г. Астана, район Алматы, пр. Тәуелсіздік, д. 21/5, н.п. 6",
 } as const;
 
-export const WHATSAPP = `https://wa.me/${MANAGER_PHONE}?text=${encodeURIComponent("Здравствуйте! Хочу записаться на детейлинг")}`;
+export function whatsappUrl(text: string) {
+  return `https://wa.me/${MANAGER_PHONE}?text=${encodeURIComponent(text)}`;
+}
+
+// Neutral first message for park-wide links (homepage, footer); direction pages pass their own.
+export const WHATSAPP = whatsappUrl("Здравствуйте!");
+export const DETAILING_WHATSAPP = whatsappUrl("Здравствуйте! Хочу записаться на детейлинг");
 
 export const LOCATION = { lat: 51.207227, lon: 71.497783 };
 export const TWO_GIS_ID = "70000001116395659";
