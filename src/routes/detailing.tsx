@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { bookingSchema } from "@/lib/booking-schema";
+import type { DirectionSlug } from "@/lib/directions";
 import { supabase } from "@/integrations/supabase/client";
 import { GOALS, reachGoal } from "@/lib/analytics";
 import { ADDRESS, HOURS, MANAGER_PHONE, PHONE, PHONE_HREF, WHATSAPP } from "@/lib/business-info";
@@ -303,6 +304,7 @@ function BookingForm() {
       car: d.car || null,
       service: d.service,
       preferred_date: d.date || null,
+      direction: "detailing" satisfies DirectionSlug,
     });
 
     if (dbError) {
