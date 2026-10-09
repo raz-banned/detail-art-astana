@@ -55,9 +55,10 @@ the staff CRM (see below).
 
 **Business info**: `src/lib/business-info.ts` is the single source for contact and location data —
 phone, WhatsApp link, address, working hours, 2GIS widget/org id, route links, social links and the
-legal entity. Import from there instead of hardcoding these strings in markup. `SOCIAL_LINKS` and
-`LEGAL_ENTITY` are intentionally empty until confirmed by the owner (the footer hides them while
-empty); never invent company details such as the legal entity, BIN or social accounts.
+legal entity. Import from there instead of hardcoding these strings in markup. `LEGAL_ENTITY`
+(name and BIN) is confirmed by the company; it's shown in the footer and in the privacy policy as the
+personal-data operator. `SOCIAL_LINKS` stays empty until confirmed (the footer hides it while
+empty); never invent company details such as social accounts.
 
 ## Content reliability
 

@@ -103,8 +103,7 @@ export function SiteFooter() {
       <div className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>
-            © {new Date().getFullYear()} {LEGAL_ENTITY || "Apelsin Industrial Park"}. Все права
-            защищены.
+            © {new Date().getFullYear()} {LEGAL_ENTITY.name}. Все права защищены.
           </p>
           <Link to="/privacy" className="hover:text-primary">
             Политика конфиденциальности
