@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { PHONE } from "@/lib/business-info";
+import { LEGAL_ENTITY, PHONE } from "@/lib/business-info";
 import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/privacy")({
@@ -8,7 +8,7 @@ export const Route = createFileRoute("/privacy")({
       path: "/privacy",
       title: "Политика конфиденциальности — APELSIN INDUSTRIAL",
       description:
-        "Политика обработки персональных данных APELSIN INDUSTRIAL: какие данные собираются через форму заявки и как они используются.",
+        "Политика обработки персональных данных APELSIN INDUSTRIAL: какие данные собираются через формы заявки и как они используются.",
     }),
   component: PrivacyPolicy,
 });
@@ -32,7 +32,8 @@ function PrivacyPolicy() {
         <h1 className="mt-3 text-4xl sm:text-5xl">Политика конфиденциальности</h1>
         <p className="mt-4 text-sm text-muted-foreground">
           Действует в отношении данных, которые посетители сайта APELSIN INDUSTRIAL указывают в
-          форме заявки на детейлинг.
+          формах заявки. Оператор персональных данных — {LEGAL_ENTITY.name}, БИН {LEGAL_ENTITY.bin},
+          юридический адрес: {LEGAL_ENTITY.address}.
         </p>
 
         <div className="surface-panel mt-10 space-y-8 rounded-lg p-6 text-sm leading-relaxed text-muted-foreground sm:p-8">
@@ -40,7 +41,8 @@ function PrivacyPolicy() {
             <h2 className="text-lg font-semibold text-foreground">1. Какие данные собираются</h2>
             <p className="mt-2">
               При отправке формы заявки на сайте мы собираем: имя, номер телефона, марку и модель
-              автомобиля (если указаны), выбранную услугу и желаемую дату записи.
+              автомобиля или техники (если указаны), направление и выбранную услугу, желаемую дату
+              записи.
             </p>
           </section>
 
@@ -49,7 +51,7 @@ function PrivacyPolicy() {
             <p className="mt-2">
               Данные используются исключительно для оформления и обработки заявки: связи с вами по
               указанному номеру телефона, подтверждения записи и согласования деталей услуги в
-              WhatsApp.
+              WhatsApp, а также уведомления сотрудников о новой заявке.
             </p>
           </section>
 
@@ -58,9 +60,10 @@ function PrivacyPolicy() {
               3. Хранение и передача третьим лицам
             </h2>
             <p className="mt-2">
-              Данные заявки сохраняются в базе данных сервиса и не передаются третьим лицам, за
-              исключением случаев, необходимых для связи с вами (мессенджер WhatsApp) или требований
-              законодательства Республики Казахстан.
+              Данные заявки хранятся в базе данных у облачного провайдера (Supabase) и не передаются
+              третьим лицам, за исключением мессенджеров WhatsApp и Telegram — для связи с вами и
+              уведомления сотрудников о новой заявке, — а также случаев, предусмотренных
+              законодательством Республики Казахстан.
             </p>
           </section>
 

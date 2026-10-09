@@ -13,8 +13,14 @@ export const HOURS = "Ежедневно 09:00 — 21:00";
 // TODO: fill in once confirmed by the owner; the footer hides these while empty.
 // Official accounts only, e.g. { label: "Instagram", href: "https://instagram.com/..." }.
 export const SOCIAL_LINKS: { label: string; href: string }[] = [];
-// Legal entity shown in the footer and privacy policy, e.g. "ТОО «…», БИН 000000000000".
-export const LEGAL_ENTITY = "";
+// Legal entity, confirmed by the company (2026-10-09). The footer shows the name, the privacy
+// policy names it with the BIN and legal address as the personal-data operator. The legal address
+// is the registered office, not where the park is (ADDRESS).
+export const LEGAL_ENTITY = {
+  name: "ТОО «АСТ-Сервисгрупп»",
+  bin: "160340004084",
+  address: "010000, Казахстан, г. Астана, район Алматы, пр. Тәуелсіздік, д. 21/5, н.п. 6",
+} as const;
 
 export const WHATSAPP = `https://wa.me/${MANAGER_PHONE}?text=${encodeURIComponent("Здравствуйте! Хочу записаться на детейлинг")}`;
 
