@@ -14,6 +14,10 @@ export type Direction = {
   path: "/detailing" | null;
 };
 
+export function directionTitle(slug: string): string {
+  return DIRECTIONS.find((d) => d.slug === slug)?.title ?? slug;
+}
+
 export const DIRECTIONS: Direction[] = [
   {
     slug: "detailing",

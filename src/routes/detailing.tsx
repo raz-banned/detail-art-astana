@@ -1,10 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { bookingSchema } from "@/lib/booking-schema";
-import type { DirectionSlug } from "@/lib/directions";
-import { supabase } from "@/integrations/supabase/client";
 import { GOALS, reachGoal } from "@/lib/analytics";
-import { ADDRESS, HOURS, MANAGER_PHONE, PHONE, PHONE_HREF, WHATSAPP } from "@/lib/business-info";
+import { ADDRESS, HOURS, PHONE, PHONE_HREF, WHATSAPP } from "@/lib/business-info";
 
 import {
   Sparkles,
@@ -30,6 +27,7 @@ import beforeInterior from "@/assets/before-interior.jpg";
 import afterInterior from "@/assets/after-interior.jpg";
 import { seoHead } from "@/lib/seo";
 import { useReveal } from "@/hooks/use-reveal";
+import { BookingForm } from "@/components/site/booking-form";
 import { ContactsSection } from "@/components/site/contacts-section";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader, type NavItem } from "@/components/site/site-header";
@@ -263,171 +261,6 @@ function BeforeAfter({ before, after, label }: { before: string; after: string; 
   );
 }
 
-function BookingForm() {
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
-  const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState({
-    name: "",
-    phone: "",
-    car: "",
-    service: "Керамическое покрытие",
-    date: "",
-  });
-  const [consent, setConsent] = useState(false);
-
-  const field =
-    "w-full rounded-md border border-input bg-secondary px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-primary";
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!consent) {
-      setStatus("error");
-      setError("Подтвердите согласие на обработку персональных данных");
-      return;
-    }
-    const parsed = bookingSchema.safeParse(form);
-    if (!parsed.success) {
-      setStatus("error");
-      setError(parsed.error.issues[0]?.message ?? "Проверьте введённые данные");
-      return;
-    }
-    const d = parsed.data;
-    setStatus("sending");
-    setError(null);
-
-    const whatsappWindow = window.open("", "_blank");
-    if (whatsappWindow) whatsappWindow.opener = null;
-
-    const { error: dbError } = await supabase.from("bookings").insert({
-      name: d.name,
-      phone: d.phone,
-      car: d.car || null,
-      service: d.service,
-      preferred_date: d.date || null,
-      direction: "detailing" satisfies DirectionSlug,
-    });
-
-    if (dbError) {
-      whatsappWindow?.close();
-      setStatus("error");
-      setError("Не удалось сохранить заявку. Попробуйте ещё раз или напишите нам в WhatsApp.");
-      return;
-    }
-
-    const lines = [
-      "Новая заявка с сайта APELSIN INDUSTRIAL",
-      `Имя: ${d.name}`,
-      `Телефон: ${d.phone}`,
-      d.car ? `Авто: ${d.car}` : null,
-      `Услуга: ${d.service}`,
-      d.date ? `Желаемая дата: ${d.date}` : null,
-    ].filter(Boolean);
-
-    const url = `https://wa.me/${MANAGER_PHONE}?text=${encodeURIComponent(lines.join("\n"))}`;
-    if (whatsappWindow) whatsappWindow.location.href = url;
-    else window.open(url, "_blank", "noopener,noreferrer");
-
-    reachGoal(GOALS.bookingSubmit);
-    setStatus("sent");
-  };
-
-  if (status === "sent") {
-    return (
-      <div className="surface-panel rounded-lg p-8 text-center">
-        <Check className="mx-auto h-10 w-10 text-primary" />
-        <h3 className="mt-4 text-2xl">Заявка отправлена в WhatsApp</h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {form.name}, ваша заявка открыта в WhatsApp менеджера — отправьте сообщение, и мы
-          перезвоним на {form.phone} в течение 15 минут.
-        </p>
-        <button onClick={() => setStatus("idle")} className="mt-6 text-sm text-primary underline">
-          Отправить ещё одну заявку
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <form className="surface-panel space-y-4 rounded-lg p-6 sm:p-8" onSubmit={submit}>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <input
-          required
-          maxLength={80}
-          className={field}
-          placeholder="Ваше имя"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-        />
-        <input
-          required
-          type="tel"
-          maxLength={20}
-          className={field}
-          placeholder="+7 (___) ___ __ __"
-          value={form.phone}
-          onChange={(e) => setForm({ ...form, phone: e.target.value })}
-        />
-        <input
-          maxLength={80}
-          className={field}
-          placeholder="Марка и модель авто"
-          value={form.car}
-          onChange={(e) => setForm({ ...form, car: e.target.value })}
-        />
-        <input
-          type="date"
-          className={field}
-          value={form.date}
-          onChange={(e) => setForm({ ...form, date: e.target.value })}
-        />
-      </div>
-      <select
-        className={field}
-        value={form.service}
-        onChange={(e) => setForm({ ...form, service: e.target.value })}
-      >
-        {services.map((s) => (
-          <option key={s.title} value={s.title}>
-            {s.title}
-          </option>
-        ))}
-      </select>
-      <label className="flex items-start gap-3 text-xs text-muted-foreground">
-        <input
-          type="checkbox"
-          required
-          checked={consent}
-          onChange={(e) => setConsent(e.target.checked)}
-          className="mt-0.5 h-4 w-4 shrink-0 rounded border-input accent-primary"
-        />
-        <span>
-          Я согласен(на) на обработку указанных персональных данных (имя, телефон и данные об авто)
-          в соответствии с{" "}
-          <Link to="/privacy" className="text-primary hover:underline">
-            политикой конфиденциальности
-          </Link>{" "}
-          — они будут использованы для оформления и обработки заявки на детейлинг.
-        </span>
-      </label>
-      {status === "error" && error && (
-        <p
-          role="alert"
-          className="rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive"
-        >
-          {error}
-        </p>
-      )}
-      <button
-        type="submit"
-        disabled={status === "sending"}
-        className="btn-ember w-full rounded-md px-6 py-4 text-sm disabled:opacity-60"
-      >
-        {status === "sending" ? "Отправляем в WhatsApp…" : "Отправить заявку в WhatsApp"}
-      </button>
-    </form>
-  );
-}
-
 function DetailingPage() {
   const nav: NavItem[] = [
     ["Услуги", "#services"],
@@ -658,7 +491,7 @@ function DetailingPage() {
               </li>
             </ul>
           </div>
-          <BookingForm />
+          <BookingForm direction="detailing" services={services.map((s) => s.title)} />
         </div>
       </section>
 

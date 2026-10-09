@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Booking fields shared by the public form on the homepage and the CRM's manual entry,
+// Booking fields shared by the public BookingForm on the direction pages and the CRM's manual entry,
 // so both validate a phone number or name the same way.
 export const bookingSchema = z.object({
   name: z.string().trim().min(2, "Укажите имя (минимум 2 символа)").max(80, "Имя слишком длинное"),
