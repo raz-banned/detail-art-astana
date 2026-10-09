@@ -45,12 +45,13 @@ error-boundary components) — never create `src/pages/` or Next.js/Remix-style 
 `src/routeTree.gen.ts` is auto-generated; don't hand-edit it. See `src/routes/README.md` for the
 file-based routing conventions (dynamic `$id`, optional `{-$category}`, splat `$.tsx`, `_layout.tsx`).
 
-The entire homepage (hero, services, pricing, before/after gallery, reviews, about, booking form,
-map, footer) lives in one file: `src/routes/index.tsx`. There are no separate section/page
-components — content arrays (`services`, `pricing`, `reviews`) and the `BookingForm` /
-`BeforeAfter` components are defined inline in that file. The other public page is
-`src/routes/privacy.tsx` (privacy policy for the booking form's personal data); `/admin` is the
-staff CRM (see below).
+The homepage (`src/routes/index.tsx`) is a hub for the whole park: cards for each direction, built
+from `DIRECTIONS` in `src/lib/directions.ts` (which also feeds the header menu and footer; a
+direction without a `path` shows as "скоро"). Each direction gets its own page, e.g.
+`src/routes/detailing.tsx`, with its content arrays defined inline. Shared site parts live in
+`src/components/site/` (header, footer, contacts, WhatsApp button, `BookingForm`). The other public
+page is `src/routes/privacy.tsx` (privacy policy for the booking form's personal data); `/admin` is
+the staff CRM (see below).
 
 **Business info**: `src/lib/business-info.ts` is the single source for contact and location data —
 phone, WhatsApp link, address, working hours, 2GIS widget/org id, route links, social links and the
@@ -98,7 +99,8 @@ JSON) into the same rendered error page. `src/lib/error-capture.ts`, `error-page
 - `previewAuthStorage.ts` / `cron-auth.ts` / `auth-middleware.ts` — auth storage brokering and
   server-side auth middleware for protected server functions/routes.
 
-The booking form (`BookingForm` in `src/routes/index.tsx`) inserts into a `bookings` table via
+The booking form (`src/components/site/booking-form.tsx`, used by each direction page with its
+`direction` slug and services) inserts into a `bookings` table via
 `supabase.from("bookings").insert(...)`, validated client-side with the `zod` schema in
 `src/lib/booking-schema.ts` (shared with the CRM's manual entry), then redirects a
 pre-opened window to a `wa.me` WhatsApp deep link with the booking details prefilled. The window is
