@@ -8,7 +8,7 @@ export const Route = createFileRoute("/privacy")({
       path: "/privacy",
       title: "Политика конфиденциальности — APELSIN INDUSTRIAL",
       description:
-        "Политика обработки персональных данных APELSIN INDUSTRIAL: какие данные собираются через форму заявки и как они используются.",
+        "Политика обработки персональных данных APELSIN INDUSTRIAL: какие данные собираются через формы заявки и как они используются.",
     }),
   component: PrivacyPolicy,
 });
@@ -32,7 +32,8 @@ function PrivacyPolicy() {
         <h1 className="mt-3 text-4xl sm:text-5xl">Политика конфиденциальности</h1>
         <p className="mt-4 text-sm text-muted-foreground">
           Действует в отношении данных, которые посетители сайта APELSIN INDUSTRIAL указывают в
-          формах заявки. Оператор персональных данных — {LEGAL_ENTITY.name}, БИН {LEGAL_ENTITY.bin}.
+          формах заявки. Оператор персональных данных — {LEGAL_ENTITY.name}, БИН {LEGAL_ENTITY.bin},
+          юридический адрес: {LEGAL_ENTITY.address}.
         </p>
 
         <div className="surface-panel mt-10 space-y-8 rounded-lg p-6 text-sm leading-relaxed text-muted-foreground sm:p-8">
@@ -50,7 +51,7 @@ function PrivacyPolicy() {
             <p className="mt-2">
               Данные используются исключительно для оформления и обработки заявки: связи с вами по
               указанному номеру телефона, подтверждения записи и согласования деталей услуги в
-              WhatsApp.
+              WhatsApp, а также уведомления сотрудников о новой заявке.
             </p>
           </section>
 

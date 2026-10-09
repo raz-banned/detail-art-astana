@@ -56,8 +56,8 @@ the staff CRM (see below).
 **Business info**: `src/lib/business-info.ts` is the single source for contact and location data —
 phone, WhatsApp link, address, working hours, 2GIS widget/org id, route links, social links and the
 legal entity. Import from there instead of hardcoding these strings in markup. `LEGAL_ENTITY`
-(name and BIN) is confirmed by the company; it's shown in the footer and in the privacy policy as the
-personal-data operator. `SOCIAL_LINKS` stays empty until confirmed (the footer hides it while
+(name, BIN, legal address) is confirmed by the company; it's shown in the footer and in the privacy
+policy as the personal-data operator. `SOCIAL_LINKS` stays empty until confirmed (the footer hides it while
 empty); never invent company details such as social accounts.
 
 ## Content reliability
@@ -66,7 +66,8 @@ Most of the site's content is unverified placeholder data and is likely wrong. R
 still being collected from the company.
 
 - **Reliable**: phone and WhatsApp number, the address (Apelsin Industrial Park, ул. Алаш 46/2,
-  Астана), the map location / 2GIS organization, the brand name and logo. Anything else counts as
+  Астана), the map location / 2GIS organization, the brand name and logo, the legal entity
+  (`LEGAL_ENTITY`) and the directions list in `src/lib/directions.ts`. Anything else counts as
   unverified unless the user confirms it.
 - **Unverified**: the services list and descriptions, pricing packages, the hero stats ("9 лет на
   рынке", "3 года гарантия керамики", 2GIS rating), working hours, promises such as "перезвоним в
