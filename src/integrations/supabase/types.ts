@@ -33,6 +33,7 @@ export type Database = {
         Row: {
           car: string | null
           created_at: string
+          direction: string
           id: string
           name: string
           note: string | null
@@ -45,6 +46,7 @@ export type Database = {
         Insert: {
           car?: string | null
           created_at?: string
+          direction?: string
           id?: string
           name: string
           note?: string | null
@@ -57,6 +59,7 @@ export type Database = {
         Update: {
           car?: string | null
           created_at?: string
+          direction?: string
           id?: string
           name?: string
           note?: string | null

@@ -8,10 +8,13 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 import { bookingSchema } from "@/lib/booking-schema";
+import { DIRECTION_SLUGS } from "@/lib/directions";
 import {
+  BOOKING_DIRECTIONS,
   BOOKING_SOURCES,
   BOOKING_STATUSES,
   MANUAL_BOOKING_SOURCES,
+  bookingDirectionLabel,
   bookingSourceLabel,
   bookingStatusLabel,
   clientStatusMessage,
@@ -49,6 +52,7 @@ const BOOKINGS_KEY = ["admin", "bookings"];
 function BookingsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sourceFilter, setSourceFilter] = useState<string>("all");
+  const [directionFilter, setDirectionFilter] = useState<string>("all");
 
   const bookings = useQuery({
     queryKey: BOOKINGS_KEY,
@@ -76,11 +80,16 @@ function BookingsPage() {
   }
 
   const all = bookings.data;
-  // Each row's counts follow the other row's filter, so a chip's number matches the list
-  // it shows.
-  const bySource = sourceFilter === "all" ? all : all.filter((b) => b.source === sourceFilter);
-  const byStatus = statusFilter === "all" ? all : all.filter((b) => b.status === statusFilter);
-  const visible = bySource.filter((b) => statusFilter === "all" || b.status === statusFilter);
+  // "all" lets every booking through; otherwise the field must match the chosen chip.
+  const byStatus = (b: Booking) => statusFilter === "all" || b.status === statusFilter;
+  const bySource = (b: Booking) => sourceFilter === "all" || b.source === sourceFilter;
+  const byDirection = (b: Booking) => directionFilter === "all" || b.direction === directionFilter;
+  // Each row's counts follow the other rows' filters but not its own, so a chip's number
+  // matches the list it shows when clicked.
+  const forStatusRow = all.filter((b) => bySource(b) && byDirection(b));
+  const forSourceRow = all.filter((b) => byStatus(b) && byDirection(b));
+  const forDirectionRow = all.filter((b) => byStatus(b) && bySource(b));
+  const visible = all.filter((b) => byStatus(b) && bySource(b) && byDirection(b));
 
   return (
     <div className="space-y-6">
@@ -100,7 +109,7 @@ function BookingsPage() {
           options={BOOKING_STATUSES}
           value={statusFilter}
           onChange={setStatusFilter}
-          items={bySource}
+          items={forStatusRow}
           field="status"
         />
         <FilterRow
@@ -108,8 +117,16 @@ function BookingsPage() {
           options={BOOKING_SOURCES}
           value={sourceFilter}
           onChange={setSourceFilter}
-          items={byStatus}
+          items={forSourceRow}
           field="source"
+        />
+        <FilterRow
+          label="Направление"
+          options={BOOKING_DIRECTIONS}
+          value={directionFilter}
+          onChange={setDirectionFilter}
+          items={forDirectionRow}
+          field="direction"
         />
       </div>
 
@@ -139,11 +156,11 @@ function FilterRow({
   value: string;
   onChange: (value: string) => void;
   items: Booking[];
-  field: "status" | "source";
+  field: "status" | "source" | "direction";
 }) {
   return (
     <div role="group" aria-label={label} className="flex flex-wrap items-center gap-2">
-      <span className="w-20 text-sm text-muted-foreground">{label}</span>
+      <span className="w-28 text-sm text-muted-foreground">{label}</span>
       <FilterChip active={value === "all"} onClick={() => onChange("all")}>
         Все · {items.length}
       </FilterChip>
@@ -214,10 +231,13 @@ const emptyForm = {
   service: "",
   date: "",
   source: MANUAL_BOOKING_SOURCES[0]?.value ?? "",
+  direction: "",
 };
 
 const manualBookingSchema = bookingSchema.extend({
   source: z.string().min(1, "Выберите источник"),
+  // No default: a manual booking for the truck service mustn't silently become detailing.
+  direction: z.enum(DIRECTION_SLUGS, { message: "Выберите направление" }),
 });
 
 function AddBookingDialog() {
@@ -267,6 +287,7 @@ function AddBookingDialog() {
       service: d.service,
       preferred_date: d.date || null,
       source: d.source,
+      direction: d.direction,
     });
   };
 
@@ -337,6 +358,20 @@ function AddBookingDialog() {
               onChange={(e) => set("date")(e.target.value)}
             />
           </LabeledField>
+          <LabeledField id="booking-direction" label="Направление">
+            <Select value={form.direction} onValueChange={set("direction")}>
+              <SelectTrigger id="booking-direction">
+                <SelectValue placeholder="Выберите" />
+              </SelectTrigger>
+              <SelectContent>
+                {BOOKING_DIRECTIONS.map((d) => (
+                  <SelectItem key={d.value} value={d.value}>
+                    {d.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </LabeledField>
           <LabeledField id="booking-source" label="Источник">
             <Select value={form.source} onValueChange={set("source")}>
               <SelectTrigger id="booking-source">
@@ -398,6 +433,7 @@ function BookingCard({ booking: b }: { booking: Booking }) {
             <Badge variant={b.source === "site" ? "outline" : "default"}>
               {bookingSourceLabel(b.source)}
             </Badge>
+            <Badge variant="secondary">{bookingDirectionLabel(b.direction)}</Badge>
           </div>
           <p className="flex flex-wrap gap-x-3 text-sm">
             <a href={`tel:+${phoneDigits(b.phone)}`} className="text-primary hover:underline">
