@@ -9,7 +9,8 @@ import { directionTitle, type DirectionSlug } from "@/lib/directions";
 
 // The booking form shared by the direction pages. Each page passes its own direction (stored in
 // bookings.direction, so the CRM can filter by it) and the services offered in the select; with
-// no services the select is hidden and the direction's name is sent as the service.
+// no services the select is hidden and the direction's name is sent as the service. Nothing is
+// preselected: a visitor who skips the select would otherwise book the first service by accident.
 // `carPlaceholder={null}` hides the car field for directions that don't work on vehicles.
 export function BookingForm({
   direction,
@@ -22,13 +23,8 @@ export function BookingForm({
 }) {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState({
-    name: "",
-    phone: "",
-    car: "",
-    service: services[0] ?? directionTitle(direction),
-    date: "",
-  });
+  const noService = services.length > 0 ? "" : directionTitle(direction);
+  const [form, setForm] = useState({ name: "", phone: "", car: "", service: noService, date: "" });
   const [consent, setConsent] = useState(false);
 
   const field =
@@ -97,7 +93,14 @@ export function BookingForm({
           {form.name}, ваша заявка открыта в WhatsApp менеджера — отправьте сообщение, и мы
           перезвоним на {form.phone}.
         </p>
-        <button onClick={() => setStatus("idle")} className="mt-6 text-sm text-primary underline">
+        <button
+          onClick={() => {
+            // Keep the contact details, but make the next booking pick its service again.
+            setForm({ ...form, service: noService });
+            setStatus("idle");
+          }}
+          className="mt-6 text-sm text-primary underline"
+        >
           Отправить ещё одну заявку
         </button>
       </div>
@@ -143,10 +146,19 @@ export function BookingForm({
       </div>
       {services.length > 0 && (
         <select
-          className={field}
+          required
+          aria-label="Услуга"
+          // Grey like the inputs' placeholders until a service is chosen; the options keep the
+          // normal colour, since some browsers pass the select's colour on to its dropdown.
+          className={
+            form.service ? field : `${field} text-muted-foreground [&>option]:text-foreground`
+          }
           value={form.service}
           onChange={(e) => setForm({ ...form, service: e.target.value })}
         >
+          <option value="" disabled>
+            Выберите услугу
+          </option>
           {services.map((s) => (
             <option key={s} value={s}>
               {s}
