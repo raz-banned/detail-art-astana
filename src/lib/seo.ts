@@ -7,7 +7,7 @@ export const SITEMAP_PATHS = ["/", "/detailing", "/privacy"] as const;
 // Pages still showing draft copy the company hasn't confirmed: kept out of the sitemap and
 // marked noindex, so search engines don't pick up services that may be wrong. Move a path to
 // SITEMAP_PATHS once its copy is real.
-export const DRAFT_PATHS = ["/metal-workshop", "/trucks"] as const;
+export const DRAFT_PATHS = ["/metal-workshop", "/trucks", "/minibus"] as const;
 
 export type SitemapPath = (typeof SITEMAP_PATHS)[number];
 type DraftPath = (typeof DRAFT_PATHS)[number];
