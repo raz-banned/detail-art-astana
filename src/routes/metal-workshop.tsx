@@ -4,23 +4,22 @@ import {
   DoorOpen,
   Factory,
   Flame,
-  MapPin,
-  MessageCircle,
-  Phone,
   Scissors,
   Sun,
   Warehouse,
   Wind,
-  Wrench,
   Zap,
   type LucideIcon,
 } from "lucide-react";
 import workshopImg from "@/assets/metal-workshop.webp";
-import { GOALS, reachGoal } from "@/lib/analytics";
-import { ADDRESS, PHONE, PHONE_HREF, whatsappUrl } from "@/lib/business-info";
+import { ADDRESS, whatsappUrl } from "@/lib/business-info";
 import { getDirection } from "@/lib/directions";
 import { seoHead } from "@/lib/seo";
-import { BookingForm } from "@/components/site/booking-form";
+import {
+  DirectionBooking,
+  DirectionCtas,
+  DirectionServices,
+} from "@/components/site/direction-blocks";
 import { ContactsSection } from "@/components/site/contacts-section";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader, type NavItem } from "@/components/site/site-header";
@@ -38,8 +37,8 @@ export const Route = createFileRoute("/metal-workshop")({
 
 const METAL_WHATSAPP = whatsappUrl("Здравствуйте! Хочу заказать работы в металлоцехе");
 
-// The services come from the company (DIRECTIONS); only the icons are added here, by name, so
-// reordering the list doesn't shuffle them. An unknown service gets the Wrench.
+// The services come from the company (DIRECTIONS); only their icons are added here, keyed by
+// service name (see DirectionServices).
 const metal = getDirection("metal-workshop");
 const serviceIcons: Record<string, LucideIcon> = {
   "Производство металлических изделий любой сложности": Factory,
@@ -103,20 +102,7 @@ function MetalWorkshopPage() {
           Производство металлических изделий любой сложности, сварка, лазерная резка и здания из
           металлоконструкций под ключ.
         </p>
-        <div className="mt-9 flex flex-wrap gap-3">
-          <a href="#booking" className="btn-ember rounded-md px-8 py-4 text-sm">
-            Рассчитать заказ
-          </a>
-          <a
-            href={METAL_WHATSAPP}
-            onClick={() => reachGoal(GOALS.whatsappClick)}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-md border border-border px-8 py-4 text-sm font-semibold tracking-widest uppercase transition-colors hover:border-primary hover:text-primary"
-          >
-            <MessageCircle className="h-4 w-4" /> WhatsApp
-          </a>
-        </div>
+        <DirectionCtas bookLabel="Рассчитать заказ" whatsappHref={METAL_WHATSAPP} />
         <img
           src={workshopImg}
           alt="Цех: кран-балка, сварочные посты с вытяжками и стеллажи"
@@ -126,28 +112,7 @@ function MetalWorkshopPage() {
         />
       </section>
 
-      <section id="services" className="mx-auto max-w-6xl px-4 py-24">
-        <p className="eyebrow">Услуги</p>
-        <h2 className="mt-3 text-4xl sm:text-5xl">Что делаем из металла</h2>
-        <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {metal.services.map((title) => {
-            const Icon = serviceIcons[title] ?? Wrench;
-            return (
-              <article
-                key={title}
-                className="surface-panel group rounded-lg p-6 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-primary hover:shadow-[var(--shadow-panel)]"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded bg-graphite text-primary transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground">
-                  <Icon className="h-6 w-6" />
-                </div>
-                <h3 className="mt-5 text-2xl transition-colors duration-300 group-hover:text-primary">
-                  {title}
-                </h3>
-              </article>
-            );
-          })}
-        </div>
-      </section>
+      <DirectionServices direction={metal} icons={serviceIcons} title="Что делаем из металла" />
 
       <section id="workshop" className="border-y border-border bg-graphite/40">
         <div className="mx-auto grid max-w-6xl gap-14 px-4 py-24 lg:grid-cols-2">
@@ -181,35 +146,12 @@ function MetalWorkshopPage() {
         </div>
       </section>
 
-      <section id="booking" className="mx-auto max-w-6xl px-4 py-24">
-        <div className="grid gap-10 lg:grid-cols-2">
-          <div>
-            <p className="eyebrow">Заявка</p>
-            <h2 className="mt-3 text-4xl sm:text-5xl">Есть чертёж или идея?</h2>
-            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-              Оставьте заявку или пришлите чертёж, эскиз или фото в WhatsApp — посчитаем стоимость и
-              сроки.
-            </p>
-            <ul className="mt-8 space-y-4 text-sm">
-              <li className="flex gap-3">
-                <MapPin className="h-5 w-5 shrink-0 text-primary" />
-                <span>{ADDRESS}</span>
-              </li>
-              <li className="flex gap-3">
-                <Phone className="h-5 w-5 shrink-0 text-primary" />
-                <a
-                  href={PHONE_HREF}
-                  onClick={() => reachGoal(GOALS.phoneClick)}
-                  className="hover:text-primary"
-                >
-                  {PHONE}
-                </a>
-              </li>
-            </ul>
-          </div>
-          <BookingForm direction="metal-workshop" services={metal.services} carPlaceholder={null} />
-        </div>
-      </section>
+      <DirectionBooking
+        direction={metal}
+        title="Есть чертёж или идея?"
+        text="Оставьте заявку или пришлите чертёж, эскиз или фото в WhatsApp — посчитаем стоимость и сроки."
+        carPlaceholder={null}
+      />
 
       <ContactsSection />
       <SiteFooter />

@@ -4,9 +4,6 @@ import {
   Cog,
   Drill,
   Flame,
-  MapPin,
-  MessageCircle,
-  Phone,
   ScanLine,
   Timer,
   Truck,
@@ -16,11 +13,14 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import truckImg from "@/assets/truck-hero.webp";
-import { GOALS, reachGoal } from "@/lib/analytics";
-import { ADDRESS, PHONE, PHONE_HREF, whatsappUrl } from "@/lib/business-info";
+import { ADDRESS, whatsappUrl } from "@/lib/business-info";
 import { getDirection } from "@/lib/directions";
 import { seoHead } from "@/lib/seo";
-import { BookingForm } from "@/components/site/booking-form";
+import {
+  DirectionBooking,
+  DirectionCtas,
+  DirectionServices,
+} from "@/components/site/direction-blocks";
 import { ContactsSection } from "@/components/site/contacts-section";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader, type NavItem } from "@/components/site/site-header";
@@ -38,8 +38,8 @@ export const Route = createFileRoute("/trucks")({
 
 const TRUCKS_WHATSAPP = whatsappUrl("Здравствуйте! Хочу записаться на ремонт грузовой техники");
 
-// The services come from the company (DIRECTIONS); only the icons are added here, by name, so
-// reordering the list doesn't shuffle them. An unknown service gets the Wrench.
+// The services come from the company (DIRECTIONS); only their icons are added here, keyed by
+// service name (see DirectionServices).
 const trucks = getDirection("trucks");
 const serviceIcons: Record<string, LucideIcon> = {
   "Краткосрочные ремонты": Timer,
@@ -110,20 +110,7 @@ function TrucksPage() {
           <p className="mt-6 max-w-xl text-lg text-muted-foreground">
             Краткосрочный и капитальный ремонт, переоборудование грузовой техники.
           </p>
-          <div className="mt-9 flex flex-wrap gap-3">
-            <a href="#booking" className="btn-ember rounded-md px-8 py-4 text-sm">
-              Записаться на ремонт
-            </a>
-            <a
-              href={TRUCKS_WHATSAPP}
-              onClick={() => reachGoal(GOALS.whatsappClick)}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-md border border-border px-8 py-4 text-sm font-semibold tracking-widest uppercase transition-colors hover:border-primary hover:text-primary"
-            >
-              <MessageCircle className="h-4 w-4" /> WhatsApp
-            </a>
-          </div>
+          <DirectionCtas bookLabel="Записаться на ремонт" whatsappHref={TRUCKS_WHATSAPP} />
         </div>
         {/* Stock photo, not the park's own truck (the company allowed it). Its black background
             is faded at the edges to blend into the page's. */}
@@ -136,28 +123,7 @@ function TrucksPage() {
         />
       </section>
 
-      <section id="services" className="mx-auto max-w-6xl px-4 py-24">
-        <p className="eyebrow">Услуги</p>
-        <h2 className="mt-3 text-4xl sm:text-5xl">Что делаем</h2>
-        <div className="mt-12 grid gap-5 md:grid-cols-3">
-          {trucks.services.map((title) => {
-            const Icon = serviceIcons[title] ?? Wrench;
-            return (
-              <article
-                key={title}
-                className="surface-panel group rounded-lg p-6 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-primary hover:shadow-[var(--shadow-panel)]"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded bg-graphite text-primary transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground">
-                  <Icon className="h-6 w-6" />
-                </div>
-                <h3 className="mt-5 text-2xl transition-colors duration-300 group-hover:text-primary">
-                  {title}
-                </h3>
-              </article>
-            );
-          })}
-        </div>
-      </section>
+      <DirectionServices direction={trucks} icons={serviceIcons} title="Что делаем" />
 
       <section id="repairs" className="border-y border-border bg-graphite/40">
         <div className="mx-auto max-w-6xl px-4 py-24">
@@ -175,38 +141,12 @@ function TrucksPage() {
         </div>
       </section>
 
-      <section id="booking" className="mx-auto max-w-6xl px-4 py-24">
-        <div className="grid gap-10 lg:grid-cols-2">
-          <div>
-            <p className="eyebrow">Заявка</p>
-            <h2 className="mt-3 text-4xl sm:text-5xl">Записаться на ремонт</h2>
-            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-              Оставьте заявку или опишите проблему в WhatsApp — менеджер свяжется с вами.
-            </p>
-            <ul className="mt-8 space-y-4 text-sm">
-              <li className="flex gap-3">
-                <MapPin className="h-5 w-5 shrink-0 text-primary" />
-                <span>{ADDRESS}</span>
-              </li>
-              <li className="flex gap-3">
-                <Phone className="h-5 w-5 shrink-0 text-primary" />
-                <a
-                  href={PHONE_HREF}
-                  onClick={() => reachGoal(GOALS.phoneClick)}
-                  className="hover:text-primary"
-                >
-                  {PHONE}
-                </a>
-              </li>
-            </ul>
-          </div>
-          <BookingForm
-            direction="trucks"
-            services={trucks.services}
-            carPlaceholder="Марка и модель техники"
-          />
-        </div>
-      </section>
+      <DirectionBooking
+        direction={trucks}
+        title="Записаться на ремонт"
+        text="Оставьте заявку или опишите проблему в WhatsApp — менеджер свяжется с вами."
+        carPlaceholder="Марка и модель техники"
+      />
 
       <ContactsSection />
       <SiteFooter />
