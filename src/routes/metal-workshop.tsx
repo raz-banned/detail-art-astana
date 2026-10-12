@@ -18,7 +18,7 @@ import {
 import workshopImg from "@/assets/metal-workshop.webp";
 import { GOALS, reachGoal } from "@/lib/analytics";
 import { ADDRESS, PHONE, PHONE_HREF, whatsappUrl } from "@/lib/business-info";
-import { DIRECTIONS } from "@/lib/directions";
+import { getDirection } from "@/lib/directions";
 import { seoHead } from "@/lib/seo";
 import { BookingForm } from "@/components/site/booking-form";
 import { ContactsSection } from "@/components/site/contacts-section";
@@ -40,7 +40,7 @@ const METAL_WHATSAPP = whatsappUrl("Здравствуйте! Хочу зака�
 
 // The services come from the company (DIRECTIONS); only the icons are added here, by name, so
 // reordering the list doesn't shuffle them. An unknown service gets the Wrench.
-const metal = DIRECTIONS.find((d) => d.slug === "metal-workshop")!;
+const metal = getDirection("metal-workshop");
 const serviceIcons: Record<string, LucideIcon> = {
   "Производство металлических изделий любой сложности": Factory,
   "Аргонная сварка": Flame,

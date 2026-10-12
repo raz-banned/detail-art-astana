@@ -11,8 +11,15 @@ export type Direction = {
   slug: DirectionSlug;
   title: string;
   services: string[];
-  path: "/detailing" | "/metal-workshop" | null;
+  path: "/detailing" | "/metal-workshop" | "/trucks" | null;
 };
+
+// For a direction page: fails at load with a clear message if the slug has no entry below.
+export function getDirection(slug: DirectionSlug): Direction {
+  const direction = DIRECTIONS.find((d) => d.slug === slug);
+  if (!direction) throw new Error(`No direction "${slug}" in DIRECTIONS`);
+  return direction;
+}
 
 export function directionTitle(slug: string): string {
   return DIRECTIONS.find((d) => d.slug === slug)?.title ?? slug;
@@ -40,7 +47,7 @@ export const DIRECTIONS: Direction[] = [
       "Капитальный ремонт грузовой техники",
       "Переоборудование грузовой техники",
     ],
-    path: null,
+    path: "/trucks",
   },
   {
     slug: "metal-workshop",
