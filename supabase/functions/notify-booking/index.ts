@@ -9,6 +9,32 @@ interface BookingRecord {
   preferred_date: string | null;
   // Missing until supabase/sql/2026-09-29-bookings-source.sql is applied.
   source?: string;
+  // Missing until supabase/sql/2026-10-09-bookings-direction.sql is applied.
+  direction?: string;
+}
+
+// Titles for bookings.direction slugs, kept in sync with DIRECTIONS in src/lib/directions.ts
+// (this function is deployed on its own and can't import from src/).
+const DIRECTION_TITLES: Record<string, string> = {
+  detailing: "Детейлинг",
+  minibus: "Детейлинг микроавтобусов",
+  trucks: "Грузовой сервис",
+  "metal-workshop": "Металлоцех",
+};
+
+// No direction: the line is left out rather than guessed. An unknown slug (a direction added
+// without redeploying this function) is shown as is, so the manager still sees it.
+function directionLine(slug: string | undefined): string | null {
+  if (!slug) return null;
+  const title = Object.hasOwn(DIRECTION_TITLES, slug) ? DIRECTION_TITLES[slug] : slug;
+  return `Направление: ${title}`;
+}
+
+// A direction without a services list (detailing for now) sends its own title as the service;
+// that line would only repeat the direction.
+function serviceLine(service: string, direction: string | undefined): string | null {
+  if (direction && DIRECTION_TITLES[direction] === service) return null;
+  return `Услуга: ${service}`;
 }
 
 interface WebhookPayload {
@@ -49,11 +75,12 @@ Deno.serve(async (req) => {
   }
 
   const lines = [
-    "🚗 Новая заявка с сайта APELSIN INDUSTRIAL",
+    "📩 Новая заявка с сайта APELSIN INDUSTRIAL",
+    directionLine(record.direction),
     `Имя: ${record.name}`,
     `Телефон: ${record.phone}`,
     record.car ? `Авто: ${record.car}` : null,
-    `Услуга: ${record.service}`,
+    serviceLine(record.service, record.direction),
     record.preferred_date ? `Желаемая дата: ${record.preferred_date}` : null,
   ].filter(Boolean);
 
