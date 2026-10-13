@@ -11,7 +11,7 @@ export type Direction = {
   slug: DirectionSlug;
   title: string;
   services: string[];
-  path: "/detailing" | "/metal-workshop" | "/trucks" | null;
+  path: "/detailing" | "/minibus" | "/metal-workshop" | "/trucks" | null;
 };
 
 // For a direction page: fails at load with a clear message if the slug has no entry below.
@@ -37,7 +37,7 @@ export const DIRECTIONS: Direction[] = [
     slug: "minibus",
     title: "Детейлинг микроавтобусов",
     services: ["Перетяжка салона", "Переделка салона под VIP"],
-    path: null,
+    path: "/minibus",
   },
   {
     slug: "trucks",
