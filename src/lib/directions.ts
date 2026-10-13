@@ -3,6 +3,8 @@
 // page exists, until then it's shown as "скоро". `slug` is also stored in bookings.direction,
 // and the database only accepts these values (bookings_direction_check in
 // supabase/sql/2026-10-09-bookings-direction.sql): adding or renaming one needs an SQL change.
+// The Telegram notification has its own copy of the titles (DIRECTION_TITLES in
+// supabase/functions/notify-booking/index.ts): update it and redeploy the function too.
 
 export const DIRECTION_SLUGS = ["detailing", "minibus", "trucks", "metal-workshop"] as const;
 export type DirectionSlug = (typeof DIRECTION_SLUGS)[number];

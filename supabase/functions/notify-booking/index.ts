@@ -30,6 +30,13 @@ function directionLine(slug: string | undefined): string | null {
   return `Направление: ${title}`;
 }
 
+// A direction without a services list (detailing for now) sends its own title as the service;
+// that line would only repeat the direction.
+function serviceLine(service: string, direction: string | undefined): string | null {
+  if (direction && DIRECTION_TITLES[direction] === service) return null;
+  return `Услуга: ${service}`;
+}
+
 interface WebhookPayload {
   type: "INSERT" | "UPDATE" | "DELETE";
   table: string;
@@ -68,12 +75,12 @@ Deno.serve(async (req) => {
   }
 
   const lines = [
-    "🚗 Новая заявка с сайта APELSIN INDUSTRIAL",
+    "📩 Новая заявка с сайта APELSIN INDUSTRIAL",
     directionLine(record.direction),
     `Имя: ${record.name}`,
     `Телефон: ${record.phone}`,
     record.car ? `Авто: ${record.car}` : null,
-    `Услуга: ${record.service}`,
+    serviceLine(record.service, record.direction),
     record.preferred_date ? `Желаемая дата: ${record.preferred_date}` : null,
   ].filter(Boolean);
 
