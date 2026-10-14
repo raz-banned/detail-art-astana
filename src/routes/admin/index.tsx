@@ -8,7 +8,7 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 import { bookingSchema } from "@/lib/booking-schema";
-import { DIRECTION_SLUGS } from "@/lib/directions";
+import { DIRECTION_SLUGS, directionServices, directionTitle } from "@/lib/directions";
 import {
   BOOKING_DIRECTIONS,
   BOOKING_SOURCES,
@@ -228,16 +228,33 @@ const emptyForm = {
   name: "",
   phone: "",
   car: "",
-  service: "",
+  // The service select's value: one of the direction's services or OTHER_SERVICE.
+  serviceChoice: "",
+  // Free text typed after choosing "Другое".
+  serviceOther: "",
   date: "",
   source: MANUAL_BOOKING_SOURCES[0]?.value ?? "",
   direction: "",
 };
 
-const manualBookingSchema = bookingSchema.extend({
-  source: z.string().min(1, "Выберите источник"),
+// Select value for a service outside the direction's list; can't be "" (Radix reserves it).
+const OTHER_SERVICE = "__other__";
+
+// The service to store: the chosen item, or the typed text for "Другое". A direction without a
+// services list (detailing for now) stores its title, the same as the public BookingForm does.
+// An empty result is caught by bookingSchema's "Укажите услугу".
+function resolveService(form: typeof emptyForm): string {
+  if (directionServices(form.direction).length === 0) return directionTitle(form.direction);
+  return form.serviceChoice === OTHER_SERVICE ? form.serviceOther : form.serviceChoice;
+}
+
+// Keys are checked in order and only the first issue is shown, so direction goes first: the
+// service select is disabled until a direction is chosen, and its error would point nowhere.
+const manualBookingSchema = z.object({
   // No default: a manual booking for the truck service mustn't silently become detailing.
   direction: z.enum(DIRECTION_SLUGS, { message: "Выберите направление" }),
+  ...bookingSchema.shape,
+  source: z.string().min(1, "Выберите источник"),
 });
 
 function AddBookingDialog() {
@@ -273,7 +290,7 @@ function AddBookingDialog() {
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    const parsed = manualBookingSchema.safeParse(form);
+    const parsed = manualBookingSchema.safeParse({ ...form, service: resolveService(form) });
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message ?? "Проверьте введённые данные");
       return;
@@ -293,6 +310,13 @@ function AddBookingDialog() {
 
   const set = (key: keyof typeof emptyForm) => (value: string) =>
     setForm((f) => ({ ...f, [key]: value }));
+  // Another direction has another list, so the chosen service and any error about it no longer
+  // apply.
+  const setDirection = (direction: string) => {
+    setForm((f) => ({ ...f, direction, serviceChoice: "", serviceOther: "" }));
+    setError(null);
+  };
+  const services = directionServices(form.direction);
 
   return (
     <Dialog
@@ -333,15 +357,57 @@ function AddBookingDialog() {
               onChange={(e) => set("phone")(e.target.value)}
             />
           </LabeledField>
-          <LabeledField id="booking-service" label="Услуга">
-            <Input
-              id="booking-service"
-              required
-              maxLength={120}
-              value={form.service}
-              onChange={(e) => set("service")(e.target.value)}
-            />
+          <LabeledField id="booking-direction" label="Направление">
+            <Select value={form.direction} onValueChange={setDirection}>
+              <SelectTrigger id="booking-direction">
+                <SelectValue placeholder="Выберите" />
+              </SelectTrigger>
+              <SelectContent>
+                {BOOKING_DIRECTIONS.map((d) => (
+                  <SelectItem key={d.value} value={d.value}>
+                    {d.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </LabeledField>
+          {/* A direction without a services list stores its title (see resolveService). */}
+          {(!form.direction || services.length > 0) && (
+            <LabeledField id="booking-service" label="Услуга">
+              <Select
+                value={form.serviceChoice}
+                onValueChange={set("serviceChoice")}
+                disabled={!form.direction}
+              >
+                <SelectTrigger id="booking-service">
+                  <SelectValue
+                    placeholder={form.direction ? "Выберите" : "Сначала выберите направление"}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {services.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {s}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value={OTHER_SERVICE}>Другое</SelectItem>
+                </SelectContent>
+              </Select>
+            </LabeledField>
+          )}
+          {form.serviceChoice === OTHER_SERVICE && (
+            <div className="sm:col-span-2">
+              <LabeledField id="booking-service-other" label="Какая услуга">
+                <Input
+                  id="booking-service-other"
+                  required
+                  maxLength={120}
+                  value={form.serviceOther}
+                  onChange={(e) => set("serviceOther")(e.target.value)}
+                />
+              </LabeledField>
+            </div>
+          )}
           <LabeledField id="booking-car" label="Авто">
             <Input
               id="booking-car"
@@ -357,20 +423,6 @@ function AddBookingDialog() {
               value={form.date}
               onChange={(e) => set("date")(e.target.value)}
             />
-          </LabeledField>
-          <LabeledField id="booking-direction" label="Направление">
-            <Select value={form.direction} onValueChange={set("direction")}>
-              <SelectTrigger id="booking-direction">
-                <SelectValue placeholder="Выберите" />
-              </SelectTrigger>
-              <SelectContent>
-                {BOOKING_DIRECTIONS.map((d) => (
-                  <SelectItem key={d.value} value={d.value}>
-                    {d.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </LabeledField>
           <LabeledField id="booking-source" label="Источник">
             <Select value={form.source} onValueChange={set("source")}>
