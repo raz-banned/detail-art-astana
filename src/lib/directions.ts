@@ -27,6 +27,10 @@ export function directionTitle(slug: string): string {
   return DIRECTIONS.find((d) => d.slug === slug)?.title ?? slug;
 }
 
+export function directionServices(slug: string): string[] {
+  return DIRECTIONS.find((d) => d.slug === slug)?.services ?? [];
+}
+
 export const DIRECTIONS: Direction[] = [
   {
     slug: "detailing",
