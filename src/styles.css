@@ -66,7 +66,6 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-
 :root {
   --radius: 0.25rem;
   --background: oklch(0.14 0.004 285);
@@ -143,7 +142,9 @@
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  transition: transform 0.2s ease, filter 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
   &:hover {
     transform: translateY(-2px);
     filter: brightness(1.07);
@@ -180,12 +181,16 @@
 .reveal {
   opacity: 0;
   transform: translateY(24px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s ease;
 }
 
+/* none, not translateY(0): any transform makes the section the containing block for
+   position: fixed descendants (popovers, overlays inside the booking form). */
 .reveal-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -193,9 +198,10 @@
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    /* Staggered entrances would still blink in one by one after their delays. */
+    animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
 }
-
