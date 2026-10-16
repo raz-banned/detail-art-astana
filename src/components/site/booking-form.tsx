@@ -188,7 +188,8 @@ export function BookingForm({
         {carPlaceholder !== null && (
           <input
             maxLength={80}
-            className={field}
+            // Alone in its row when the date field gives way to the slot picker.
+            className={slotted ? `${field} sm:col-span-2` : field}
             placeholder={carPlaceholder}
             value={form.car}
             onChange={(e) => setForm({ ...form, car: e.target.value })}
