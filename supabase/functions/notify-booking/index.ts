@@ -11,6 +11,8 @@ interface BookingRecord {
   source?: string;
   // Missing until supabase/sql/2026-10-09-bookings-direction.sql is applied.
   direction?: string;
+  // Missing until supabase/sql/2026-10-15-bookings-slots.sql is applied; null without a time.
+  slot_start?: string | null;
 }
 
 // Titles for bookings.direction slugs, kept in sync with DIRECTIONS in src/lib/directions.ts
@@ -35,6 +37,50 @@ function directionLine(slug: string | undefined): string | null {
 function serviceLine(service: string, direction: string | undefined): string | null {
   if (direction && DIRECTION_TITLES[direction] === service) return null;
   return `Услуга: ${service}`;
+}
+
+// Astana is UTC+5 all year, the same fixed offset as src/lib/booking-slots.ts (keep in sync).
+// Not timeZone: "Asia/Almaty": the runtime's time zone data may predate Kazakhstan's 2024 switch.
+const ASTANA_OFFSET_MS = 5 * 60 * 60 * 1000;
+// Spelled out rather than Intl's "ru-RU": a runtime without Russian locale data would silently
+// print "Tuesday, October 20".
+const WEEKDAYS = [
+  "воскресенье",
+  "понедельник",
+  "вторник",
+  "среда",
+  "четверг",
+  "пятница",
+  "суббота",
+];
+const MONTHS = [
+  "января",
+  "февраля",
+  "марта",
+  "апреля",
+  "мая",
+  "июня",
+  "июля",
+  "августа",
+  "сентября",
+  "октября",
+  "ноября",
+  "декабря",
+];
+
+// "Время: вторник, 20 октября, 10:00", the same as the site's WhatsApp message. Parsed as a
+// date, not cut from the string: the webhook's JSON may carry any UTC offset ("+00:00", "Z").
+// A value that isn't a usable date (anyone can insert through the API) is shown as stored, so
+// the notification still goes out. Without a slot the preferred date is shown, as before.
+function timeLine(record: BookingRecord): string | null {
+  if (record.slot_start) {
+    const astana = new Date(new Date(record.slot_start).getTime() + ASTANA_OFFSET_MS);
+    // NaN for an unparsable string, and for a date pushed past JS's range by the offset.
+    if (Number.isNaN(astana.getTime())) return `Время: ${record.slot_start}`;
+    const day = `${WEEKDAYS[astana.getUTCDay()]}, ${astana.getUTCDate()} ${MONTHS[astana.getUTCMonth()]}`;
+    return `Время: ${day}, ${astana.toISOString().slice(11, 16)}`;
+  }
+  return record.preferred_date ? `Желаемая дата: ${record.preferred_date}` : null;
 }
 
 interface WebhookPayload {
@@ -81,7 +127,7 @@ Deno.serve(async (req) => {
     `Телефон: ${record.phone}`,
     record.car ? `Авто: ${record.car}` : null,
     serviceLine(record.service, record.direction),
-    record.preferred_date ? `Желаемая дата: ${record.preferred_date}` : null,
+    timeLine(record),
   ].filter(Boolean);
 
   const telegramResponse = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
