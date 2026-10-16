@@ -40,6 +40,7 @@ export type Database = {
           phone: string
           preferred_date: string | null
           service: string
+          slot_start: string | null
           source: string
           status: string
         }
@@ -53,6 +54,7 @@ export type Database = {
           phone: string
           preferred_date?: string | null
           service: string
+          slot_start?: string | null
           source?: string
           status?: string
         }
@@ -66,6 +68,7 @@ export type Database = {
           phone?: string
           preferred_date?: string | null
           service?: string
+          slot_start?: string | null
           source?: string
           status?: string
         }
@@ -76,6 +79,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      busy_slots: {
+        Args: { p_direction: string; p_from: string; p_to: string }
+        Returns: string[]
+      }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
