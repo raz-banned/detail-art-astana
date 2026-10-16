@@ -15,9 +15,11 @@ import workshopImg from "@/assets/metal-workshop.webp";
 import { ADDRESS, whatsappUrl } from "@/lib/business-info";
 import { getDirection } from "@/lib/directions";
 import { seoHead } from "@/lib/seo";
+import { heroIn } from "@/lib/hero-in";
 import {
   DirectionBooking,
   DirectionCtas,
+  RevealSection,
   DirectionServices,
 } from "@/components/site/direction-blocks";
 import { ContactsSection } from "@/components/site/contacts-section";
@@ -94,15 +96,19 @@ function MetalWorkshopPage() {
       <SiteHeader nav={nav} cta={{ label: "Оставить заявку", href: "#booking" }} />
 
       <section id="top" className="mx-auto max-w-6xl px-4 pt-16 sm:pt-24">
-        <p className="eyebrow">Металлообработка</p>
-        <h1 className="mt-4 max-w-3xl text-5xl leading-[0.95] sm:text-7xl">
+        <p className={`eyebrow ${heroIn(0)}`}>Металлообработка</p>
+        <h1 className={`mt-4 max-w-3xl text-5xl leading-[0.95] sm:text-7xl ${heroIn(1)}`}>
           <span className="text-primary">Металлоцех</span> в Apelsin Industrial
         </h1>
-        <p className="mt-6 max-w-xl text-lg text-muted-foreground">
+        <p className={`mt-6 max-w-xl text-lg text-muted-foreground ${heroIn(2)}`}>
           Производство металлических изделий любой сложности, сварка, лазерная резка и здания из
           металлоконструкций под ключ.
         </p>
-        <DirectionCtas bookLabel="Рассчитать заказ" whatsappHref={METAL_WHATSAPP} />
+        <DirectionCtas
+          bookLabel="Рассчитать заказ"
+          whatsappHref={METAL_WHATSAPP}
+          className={heroIn(3)}
+        />
         <img
           src={workshopImg}
           alt="Цех: кран-балка, сварочные посты с вытяжками и стеллажи"
@@ -114,7 +120,7 @@ function MetalWorkshopPage() {
 
       <DirectionServices direction={metal} icons={serviceIcons} title="Что делаем из металла" />
 
-      <section id="workshop" className="border-y border-border bg-graphite/40">
+      <RevealSection id="workshop" className="border-y border-border bg-graphite/40">
         <div className="mx-auto grid max-w-6xl gap-14 px-4 py-24 lg:grid-cols-2">
           <div>
             <p className="eyebrow">Цех</p>
@@ -144,7 +150,7 @@ function MetalWorkshopPage() {
             </ol>
           </div>
         </div>
-      </section>
+      </RevealSection>
 
       <DirectionBooking
         direction={metal}
