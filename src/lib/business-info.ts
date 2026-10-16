@@ -8,6 +8,8 @@ export const PHONE = "+7 708 425 4181";
 export const PHONE_HREF = `tel:${PHONE.replace(/\s/g, "")}`;
 
 export const ADDRESS = "г. Астана, Apelsin Industrial Park, ул. Алаш 46/2";
+// Unconfirmed. Booking slots have their own hours in booking-slots.ts (BOOKING_HOURS); keep the two
+// in step when the company confirms them.
 export const HOURS = "Ежедневно 09:00 — 21:00";
 
 // TODO: fill in once confirmed by the owner; the footer hides these while empty.

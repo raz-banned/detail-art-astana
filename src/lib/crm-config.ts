@@ -8,6 +8,9 @@ import { DIRECTIONS, directionTitle } from "./directions";
 // `value` is stored in bookings.status as plain text, so adding or reordering is safe.
 // Renaming a `value` that is already in use needs one SQL update of existing rows.
 // "new" must stay: the public booking form's RLS policy only allows status = 'new'.
+// "cancelled" must stay too: it's the one status that frees a time slot
+// (bookings_direction_slot_unique and busy_slots in supabase/sql/2026-10-15-bookings-slots.sql).
+// A new closing status (e.g. a no-show) keeps its slot taken unless that SQL is changed as well.
 export const BOOKING_STATUSES = [
   { value: "new", label: "Новая" },
   { value: "in_progress", label: "В работе" },
