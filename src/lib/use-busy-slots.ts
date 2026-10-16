@@ -3,19 +3,24 @@ import { supabase } from "@/integrations/supabase/client";
 import { dayRange, slotKey } from "./booking-slots";
 import type { DirectionSlug } from "./directions";
 
+// Prefix of every busy_slots() query, for invalidating them all after a booking takes or frees a
+// slot.
+export const BUSY_SLOTS_KEY = ["busy-slots"];
+
 // Taken slots of a direction on one Astana day, as a set of slotKey() values. Goes through
-// busy_slots() because anon can't read bookings. Nothing is fetched until a day is picked, so
-// the server render and the first client render don't depend on the clock or the database.
-export function useBusySlots(direction: DirectionSlug, day: string | null) {
+// busy_slots() because anon can't read bookings. Nothing is fetched until both a direction and a
+// day are set, so the server render and the first client render don't depend on the clock or the
+// database.
+export function useBusySlots(direction: DirectionSlug | null, day: string | null) {
   return useQuery({
-    queryKey: ["busy-slots", direction, day],
-    enabled: day !== null,
+    queryKey: [...BUSY_SLOTS_KEY, direction, day],
+    enabled: direction !== null && day !== null,
     // Another client may book meanwhile; refetch when the visitor comes back to the tab.
     staleTime: 30_000,
     queryFn: async () => {
       const { from, to } = dayRange(day!);
       const { data, error } = await supabase.rpc("busy_slots", {
-        p_direction: direction,
+        p_direction: direction!,
         p_from: from,
         p_to: to,
       });

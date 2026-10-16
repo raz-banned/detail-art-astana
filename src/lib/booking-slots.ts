@@ -110,3 +110,23 @@ export function dayRange(day: string): { from: string; to: string } {
   const from = slotStart(day, "00:00");
   return { from, to: new Date(slotKey(from) + DAY_MS).toISOString() };
 }
+
+// A stored slot_start as Astana's "10:00", whatever the browser's zone.
+export function slotTime(timestamp: string): string {
+  return new Date(slotKey(timestamp) + UTC_OFFSET_MS).toISOString().slice(11, 16);
+}
+
+// A stored slot_start as its Astana day, "2026-10-20".
+export function slotDay(timestamp: string): string {
+  return astanaDay(new Date(timestamp));
+}
+
+// "вторник, 20 октября, 10:00" for a stored slot_start.
+export function slotLabel(timestamp: string): string {
+  return `${dayLabel(slotDay(timestamp), true)}, ${slotTime(timestamp)}`;
+}
+
+// The day after or before an Astana day, "2026-10-20" → "2026-10-21".
+export function shiftDay(day: string, days: number): string {
+  return new Date(Date.parse(`${day}T00:00:00Z`) + days * DAY_MS).toISOString().slice(0, 10);
+}
