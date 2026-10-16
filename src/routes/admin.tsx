@@ -96,9 +96,27 @@ function AdminLayout() {
       <>
         <header className="border-b border-border">
           <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-4">
-            <Link to="/admin" className="font-display text-xl tracking-widest">
-              APELSIN<span className="text-primary">.</span>CRM
-            </Link>
+            <div className="flex items-center gap-5">
+              <Link to="/admin" className="font-display text-xl tracking-widest">
+                APELSIN<span className="text-primary">.</span>CRM
+              </Link>
+              <nav className="flex gap-4 text-sm">
+                {/* exact: /admin would otherwise also match /admin/schedule. */}
+                <Link
+                  to="/admin"
+                  activeOptions={{ exact: true }}
+                  className="text-muted-foreground hover:text-primary data-[status=active]:text-foreground"
+                >
+                  Заявки
+                </Link>
+                <Link
+                  to="/admin/schedule"
+                  className="text-muted-foreground hover:text-primary data-[status=active]:text-foreground"
+                >
+                  Расписание
+                </Link>
+              </nav>
+            </div>
             <div className="flex items-center gap-3 text-sm">
               <span className="hidden text-muted-foreground sm:inline">{session.user.email}</span>
               <Link to="/" className="text-muted-foreground hover:text-primary">
