@@ -26,6 +26,8 @@ export const BOOKING_DAYS_AHEAD = 14;
 
 // Astana is UTC+5 all year. Slots are built in this zone, not in the visitor's browser zone,
 // so a client abroad and the manager see the same "10:00". Both forms below come from one number.
+// supabase/functions/notify-booking/index.ts repeats the offset and slotLabel()'s format for
+// Telegram (it's deployed on its own and can't import this); keep them in sync.
 const UTC_OFFSET_HOURS = 5;
 export const SLOT_UTC_OFFSET = `+${String(UTC_OFFSET_HOURS).padStart(2, "0")}:00`;
 const UTC_OFFSET_MS = UTC_OFFSET_HOURS * 60 * 60 * 1000;

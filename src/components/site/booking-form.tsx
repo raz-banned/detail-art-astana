@@ -44,7 +44,7 @@ export function BookingForm({
   // slot or at midnight), the time started, or a background refetch found it taken. Otherwise it
   // stays highlighted on a disabled button and the insert fails on the server.
   useEffect(() => {
-    if (!form.date || now === null) return;
+    if (!slotted || !form.date || now === null) return;
     if (!days.includes(form.date)) {
       setForm((f) => ({ ...f, date: "" }));
       setTime("");
@@ -53,7 +53,7 @@ export function BookingForm({
     if (!time) return;
     const key = slotKey(slotStart(form.date, time));
     if (key <= now || busy.data?.has(key)) setTime("");
-  }, [days, form.date, time, now, busy.data]);
+  }, [slotted, days, form.date, time, now, busy.data]);
 
   const field =
     "w-full rounded-md border border-input bg-secondary px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-primary";
