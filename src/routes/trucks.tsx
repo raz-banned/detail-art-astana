@@ -16,9 +16,11 @@ import truckImg from "@/assets/truck-hero.webp";
 import { ADDRESS, whatsappUrl } from "@/lib/business-info";
 import { getDirection } from "@/lib/directions";
 import { seoHead } from "@/lib/seo";
+import { heroIn } from "@/lib/hero-in";
 import {
   DirectionBooking,
   DirectionCtas,
+  RevealSection,
   DirectionServices,
 } from "@/components/site/direction-blocks";
 import { ContactsSection } from "@/components/site/contacts-section";
@@ -103,14 +105,18 @@ function TrucksPage() {
         className="mx-auto grid max-w-6xl items-center gap-10 px-4 pt-16 sm:pt-24 lg:grid-cols-[1fr_auto]"
       >
         <div>
-          <p className="eyebrow">Грузовая техника</p>
-          <h1 className="mt-4 max-w-2xl text-5xl leading-[0.95] sm:text-7xl">
+          <p className={`eyebrow ${heroIn(0)}`}>Грузовая техника</p>
+          <h1 className={`mt-4 max-w-2xl text-fluid-hero leading-[0.95] sm:text-7xl ${heroIn(1)}`}>
             <span className="text-primary">Грузовой сервис</span> в Apelsin Industrial
           </h1>
-          <p className="mt-6 max-w-xl text-lg text-muted-foreground">
+          <p className={`mt-6 max-w-xl text-lg text-muted-foreground ${heroIn(2)}`}>
             Краткосрочный и капитальный ремонт, переоборудование грузовой техники.
           </p>
-          <DirectionCtas bookLabel="Записаться на ремонт" whatsappHref={TRUCKS_WHATSAPP} />
+          <DirectionCtas
+            bookLabel="Записаться на ремонт"
+            whatsappHref={TRUCKS_WHATSAPP}
+            className={heroIn(3)}
+          />
         </div>
         {/* Stock photo, not the park's own truck (the company allowed it). Its black background
             is faded at the edges to blend into the page's. */}
@@ -125,7 +131,7 @@ function TrucksPage() {
 
       <DirectionServices direction={trucks} icons={serviceIcons} title="Что делаем" />
 
-      <section id="repairs" className="border-y border-border bg-graphite/40">
+      <RevealSection id="repairs" className="border-y border-border bg-graphite/40">
         <div className="mx-auto max-w-6xl px-4 py-24">
           <p className="eyebrow">Виды работ</p>
           <h2 className="mt-3 text-4xl sm:text-5xl">Что делаем в боксах</h2>
@@ -139,7 +145,7 @@ function TrucksPage() {
             ))}
           </div>
         </div>
-      </section>
+      </RevealSection>
 
       <DirectionBooking
         direction={trucks}
