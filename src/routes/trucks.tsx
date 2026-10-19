@@ -106,7 +106,7 @@ function TrucksPage() {
       >
         <div>
           <p className={`eyebrow ${heroIn(0)}`}>Грузовая техника</p>
-          <h1 className={`mt-4 max-w-2xl text-5xl leading-[0.95] sm:text-7xl ${heroIn(1)}`}>
+          <h1 className={`mt-4 max-w-2xl text-fluid-hero leading-[0.95] sm:text-7xl ${heroIn(1)}`}>
             <span className="text-primary">Грузовой сервис</span> в Apelsin Industrial
           </h1>
           <p className={`mt-6 max-w-xl text-lg text-muted-foreground ${heroIn(2)}`}>

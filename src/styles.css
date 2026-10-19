@@ -122,11 +122,23 @@
 
   h1,
   h2,
+  h3 {
+    hyphens: auto;
+    overflow-wrap: break-word;
+    text-wrap: balance;
+  }
+
+  h1,
+  h2,
   h3,
   .font-display {
     font-family: var(--font-display);
     letter-spacing: 0.02em;
   }
+}
+
+@utility text-fluid-hero {
+  font-size: clamp(2rem, 9vw, 3rem);
 }
 
 @utility surface-panel {

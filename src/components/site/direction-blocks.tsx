@@ -31,7 +31,7 @@ export function DirectionCtas({
   className?: string;
 }) {
   return (
-    <div className={cn("mt-9 flex flex-wrap gap-3", className)}>
+    <div className={cn("mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap ", className)}>
       <a href="#booking" className="btn-ember rounded-md px-8 py-4 text-sm">
         {bookLabel}
       </a>
@@ -40,7 +40,7 @@ export function DirectionCtas({
         onClick={() => reachGoal(GOALS.whatsappClick)}
         target="_blank"
         rel="noreferrer"
-        className="inline-flex items-center gap-2 rounded-md border border-border px-8 py-4 text-sm font-semibold tracking-widest uppercase transition-colors hover:border-primary hover:text-primary"
+        className="inline-flex items-center gap-2 rounded-md border border-border px-6 sm:px-8 py-4 justify-center text-sm font-semibold tracking-widest uppercase transition-colors hover:border-primary hover:text-primary"
       >
         <MessageCircle className="h-4 w-4" /> WhatsApp
       </a>
@@ -52,8 +52,8 @@ export function DirectionCtas({
 function gridColumns(count: number): string {
   // 2, 4, 8…: full rows of two.
   if (count % 2 === 0 && count % 3 !== 0) return "md:grid-cols-2";
-  // Exactly one row of three.
-  if (count === 3) return "md:grid-cols-3";
+  // Exactly one row of three, on a desktop only: three long titles don't fit a tablet's width.
+  if (count === 3) return "lg:grid-cols-3";
   // 5, 6, 7…: two on a tablet (long titles), three on a desktop. Full class names only: Tailwind
   // finds classes as literal strings in the source, so `md:grid-cols-${n}` wouldn't be generated.
   return "md:grid-cols-2 lg:grid-cols-3";
