@@ -1,13 +1,23 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, isValid, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
+import type { TablesInsert } from "@/integrations/supabase/types";
+import {
+  BOOKINGS_KEY,
+  isSlotTaken,
+  useBookings,
+  useUpdateBooking,
+  type Booking,
+} from "@/lib/admin-bookings";
 import { bookingSchema } from "@/lib/booking-schema";
+import { daySlots, hasSlots, slotKey, slotLabel, slotStart } from "@/lib/booking-slots";
+import { phoneDigits, whatsappUrl } from "@/lib/phone";
+import { BUSY_SLOTS_KEY, useBusySlots } from "@/lib/use-busy-slots";
 import { DIRECTION_SLUGS, directionServices, directionTitle } from "@/lib/directions";
 import {
   BOOKING_DIRECTIONS,
@@ -46,25 +56,12 @@ export const Route = createFileRoute("/admin/")({
   component: BookingsPage,
 });
 
-type Booking = Tables<"bookings">;
-const BOOKINGS_KEY = ["admin", "bookings"];
-
 function BookingsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [directionFilter, setDirectionFilter] = useState<string>("all");
 
-  const bookings = useQuery({
-    queryKey: BOOKINGS_KEY,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("bookings")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-  });
+  const bookings = useBookings();
 
   if (bookings.isPending) return <p className="text-muted-foreground">Загрузка заявок…</p>;
   // A failed background refetch keeps the loaded list (and an open add-booking dialog).
@@ -199,31 +196,6 @@ function FilterChip({
   );
 }
 
-function useUpdateBooking() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ id, patch }: { id: string; patch: TablesUpdate<"bookings"> }) => {
-      // .select().single() turns "0 rows updated" (e.g. blocked by RLS) into an error.
-      const { data, error } = await supabase
-        .from("bookings")
-        .update(patch)
-        .eq("id", id)
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
-    },
-    // A refetch started before the save could land after it and bring back old values.
-    onMutate: () => queryClient.cancelQueries({ queryKey: BOOKINGS_KEY }),
-    onSuccess: (updated) => {
-      queryClient.setQueryData<Booking[]>(BOOKINGS_KEY, (old) =>
-        old?.map((b) => (b.id === updated.id ? updated : b)),
-      );
-    },
-    onError: () => toast.error("Не удалось сохранить. Попробуйте ещё раз."),
-  });
-}
-
 const emptyForm = {
   name: "",
   phone: "",
@@ -233,12 +205,16 @@ const emptyForm = {
   // Free text typed after choosing "Другое".
   serviceOther: "",
   date: "",
+  // "HH:MM" from the direction's slots, or NO_TIME.
+  time: "",
   source: MANUAL_BOOKING_SOURCES[0]?.value ?? "",
   direction: "",
 };
 
 // Select value for a service outside the direction's list; can't be "" (Radix reserves it).
 const OTHER_SERVICE = "__other__";
+// Select value for a booking without a time (the client will call back to agree on it).
+const NO_TIME = "__none__";
 
 // The service to store: the chosen item, or the typed text for "Другое". A direction without a
 // services list (detailing for now) stores its title, the same as the public BookingForm does.
@@ -281,10 +257,19 @@ function AddBookingDialog() {
       setOpen(false);
       setForm(emptyForm);
     },
-    onError: () => {
+    onSettled: () => queryClient.invalidateQueries({ queryKey: BUSY_SLOTS_KEY }),
+    onError: (error) => {
+      // Someone (the site or another manager) booked this slot after the dialog loaded it;
+      // onSettled refreshes the time select, so the slot shows as taken.
+      const taken = isSlotTaken(error);
+      const message = taken
+        ? "Это время уже занято, выберите другое."
+        : "Не удалось сохранить. Попробуйте ещё раз.";
+      // Otherwise the taken time stays selected and the next save fails the same way.
+      if (taken) setForm((f) => ({ ...f, time: "" }));
       // The dialog may already be closed, so the inline error alone could go unseen.
-      setError("Не удалось сохранить. Попробуйте ещё раз.");
-      toast.error("Не удалось добавить заявку. Попробуйте ещё раз.");
+      setError(message);
+      toast.error(message);
     },
   });
 
@@ -296,6 +281,11 @@ function AddBookingDialog() {
       return;
     }
     const d = parsed.data;
+    const time = slotted && form.time !== NO_TIME ? form.time : "";
+    if (slotted && !form.time) {
+      setError("Выберите время или «Без времени»");
+      return;
+    }
     setError(null);
     create.mutate({
       name: d.name,
@@ -303,6 +293,8 @@ function AddBookingDialog() {
       car: d.car || null,
       service: d.service,
       preferred_date: d.date || null,
+      // Past slots are allowed here (RLS lets admins): a walk-in is often entered afterwards.
+      slot_start: time ? slotStart(d.date, time) : null,
       source: d.source,
       direction: d.direction,
     });
@@ -312,11 +304,17 @@ function AddBookingDialog() {
     setForm((f) => ({ ...f, [key]: value }));
   // Another direction has another list, so the chosen service and any error about it no longer
   // apply.
+  // Its slots and their hours differ too, so the time is chosen again.
   const setDirection = (direction: string) => {
-    setForm((f) => ({ ...f, direction, serviceChoice: "", serviceOther: "" }));
+    setForm((f) => ({ ...f, direction, serviceChoice: "", serviceOther: "", time: "" }));
     setError(null);
   };
+  const setDate = (date: string) => setForm((f) => ({ ...f, date, time: "" }));
   const services = directionServices(form.direction);
+  // Narrowed once here: TypeScript doesn't carry hasSlots() through form.direction.
+  const slotDirection = hasSlots(form.direction) ? form.direction : null;
+  const slotted = slotDirection !== null;
+  const busy = useBusySlots(slotDirection, form.date || null);
 
   return (
     <Dialog
@@ -416,14 +414,48 @@ function AddBookingDialog() {
               onChange={(e) => set("car")(e.target.value)}
             />
           </LabeledField>
-          <LabeledField id="booking-date" label="Желаемая дата">
+          <LabeledField id="booking-date" label={slotted ? "Дата" : "Желаемая дата"}>
             <Input
               id="booking-date"
               type="date"
               value={form.date}
-              onChange={(e) => set("date")(e.target.value)}
+              onChange={(e) => setDate(e.target.value)}
             />
           </LabeledField>
+          {slotDirection && (
+            <LabeledField id="booking-time" label="Время (Астана)">
+              <Select
+                value={form.time}
+                onValueChange={set("time")}
+                // «Без времени» works without a date: a client who'll call back about the day.
+                disabled={!!form.date && busy.isPending}
+              >
+                <SelectTrigger id="booking-time">
+                  <SelectValue
+                    placeholder={busy.isError ? "Не удалось загрузить часы" : "Выберите"}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NO_TIME}>Без времени</SelectItem>
+                  {!form.date && (
+                    <p className="px-2 py-1.5 text-xs text-muted-foreground">
+                      Часы появятся после выбора даты
+                    </p>
+                  )}
+                  {form.date &&
+                    busy.data &&
+                    daySlots(slotDirection).map((t) => {
+                      const taken = busy.data.has(slotKey(slotStart(form.date, t)));
+                      return (
+                        <SelectItem key={t} value={t} disabled={taken}>
+                          {taken ? `${t} — занято` : t}
+                        </SelectItem>
+                      );
+                    })}
+                </SelectContent>
+              </Select>
+            </LabeledField>
+          )}
           <LabeledField id="booking-source" label="Источник">
             <Select value={form.source} onValueChange={set("source")}>
               <SelectTrigger id="booking-source">
@@ -557,9 +589,13 @@ function BookingCard({ booking: b }: { booking: Booking }) {
       <dl className="mt-3 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-3">
         <Field label="Услуга">{b.service}</Field>
         <Field label="Авто">{b.car || "—"}</Field>
-        <Field label="Желаемая дата">
-          {b.preferred_date ? formatDate(b.preferred_date, "d MMMM yyyy") : "—"}
-        </Field>
+        {b.slot_start ? (
+          <Field label="Время">{slotLabel(b.slot_start)}</Field>
+        ) : (
+          <Field label="Желаемая дата">
+            {b.preferred_date ? formatDate(b.preferred_date, "d MMMM yyyy") : "—"}
+          </Field>
+        )}
       </dl>
 
       <div className="mt-3 space-y-2">
@@ -607,18 +643,4 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 function formatDate(value: string, pattern: string): string {
   const date = parseISO(value);
   return isValid(date) ? format(date, pattern, { locale: ru }) : value;
-}
-
-// Kazakhstan numbers: "8 7xx..." is the local form of "+7 7xx...", and the booking form
-// also accepts 10 digits without the country code ("7xx...").
-function phoneDigits(phone: string): string {
-  const digits = phone.replace(/\D/g, "");
-  if (digits.length === 11 && digits.startsWith("8")) return `7${digits.slice(1)}`;
-  if (digits.length === 10) return `7${digits}`;
-  return digits;
-}
-
-function whatsappUrl(phone: string, text?: string): string {
-  const url = `https://wa.me/${phoneDigits(phone)}`;
-  return text ? `${url}?text=${encodeURIComponent(text)}` : url;
 }
