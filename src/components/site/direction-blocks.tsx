@@ -3,21 +3,36 @@ import { GOALS, reachGoal } from "@/lib/analytics";
 import { ADDRESS, PHONE, PHONE_HREF } from "@/lib/business-info";
 import type { Direction } from "@/lib/directions";
 import { BookingForm } from "@/components/site/booking-form";
+import { useReveal } from "@/hooks/use-reveal";
+import { cn } from "@/lib/utils";
 
 // Blocks shared by the direction pages (/trucks, /metal-workshop, …). Each page keeps its own
 // hero and draft sections; these are the parts that only differ by text and direction.
 
+// A section that fades in the first time it scrolls into view, like the detailing page's.
+// Takes no ref of its own: the reveal observer needs it.
+export function RevealSection({
+  className,
+  ...props
+}: Omit<React.ComponentProps<"section">, "ref">) {
+  const reveal = useReveal<HTMLElement>();
+  return <section {...props} ref={reveal.ref} className={cn(className, reveal.className)} />;
+}
+
 // The hero's two buttons: jump to the booking form, or open WhatsApp with the page's message.
+// `className` lets the page add its entrance animation.
 export function DirectionCtas({
   bookLabel,
   whatsappHref,
+  className,
 }: {
   bookLabel: string;
   whatsappHref: string;
+  className?: string;
 }) {
   return (
-    <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-      <a href="#booking" className="btn-ember rounded-md px-6 py-4 text-center sm:px-8 text-sm">
+    <div className={cn("mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap ", className)}>
+      <a href="#booking" className="btn-ember rounded-md px-8 py-4 text-sm">
         {bookLabel}
       </a>
       <a
@@ -58,7 +73,7 @@ export function DirectionServices({
 }) {
   if (direction.services.length === 0) return null;
   return (
-    <section id="services" className="mx-auto max-w-6xl px-4 py-24">
+    <RevealSection id="services" className="mx-auto max-w-6xl px-4 py-24">
       <p className="eyebrow">Услуги</p>
       <h2 className="mt-3 text-4xl sm:text-5xl">{title}</h2>
       <div className={`mt-12 grid gap-5 ${gridColumns(direction.services.length)}`}>
@@ -79,7 +94,7 @@ export function DirectionServices({
           );
         })}
       </div>
-    </section>
+    </RevealSection>
   );
 }
 
@@ -97,7 +112,7 @@ export function DirectionBooking({
   carPlaceholder?: string | null | undefined;
 }) {
   return (
-    <section id="booking" className="mx-auto max-w-6xl px-4 py-24">
+    <RevealSection id="booking" className="mx-auto max-w-6xl px-4 py-24">
       <div className="grid gap-10 lg:grid-cols-2">
         <div>
           <p className="eyebrow">Заявка</p>
@@ -127,6 +142,6 @@ export function DirectionBooking({
           {...(carPlaceholder !== undefined && { carPlaceholder })}
         />
       </div>
-    </section>
+    </RevealSection>
   );
 }

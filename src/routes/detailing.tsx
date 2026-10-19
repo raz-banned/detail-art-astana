@@ -27,6 +27,7 @@ import beforeInterior from "@/assets/before-interior.jpg";
 import afterInterior from "@/assets/after-interior.jpg";
 import { seoHead } from "@/lib/seo";
 import { useReveal } from "@/hooks/use-reveal";
+import { heroIn } from "@/lib/hero-in";
 import { BookingForm } from "@/components/site/booking-form";
 import { ContactsSection } from "@/components/site/contacts-section";
 import { SiteFooter } from "@/components/site/site-footer";
@@ -300,27 +301,23 @@ function DetailingPage() {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/25 lg:via-background/40 lg:to-transparent" />
         <div className="relative mx-auto max-w-6xl px-4 py-28 sm:py-36">
-          <p
-            className={`eyebrow ${ready ? "animate-[fade-in-up_0.6s_ease_both] [animation-delay:60ms]" : "opacity-0"}`}
-          >
+          <p className={`eyebrow ${ready ? heroIn(0) : "opacity-0"}`}>
             Астана · Apelsin Industrial Park · Алаш 46/2
           </p>
           <h1
-            className={`mt-4 max-w-2xl text-fluid-hero leading-[0.95] sm:text-7xl ${ready ? "animate-[fade-in-up_0.6s_ease_both] [animation-delay:120ms]" : "opacity-0"}`}
+            className={`mt-4 max-w-2xl text-fluid-hero leading-[0.95] sm:text-7xl ${ready ? heroIn(1) : "opacity-0"}`}
           >
             Детейлинг
             <span className="text-primary"> авто и фур</span>
           </h1>
           <p
-            className={`mt-6 max-w-xl text-lg text-muted-foreground ${ready ? "animate-[fade-in-up_0.6s_ease_both] [animation-delay:180ms]" : "opacity-0"}`}
+            className={`mt-6 max-w-xl text-lg text-muted-foreground ${ready ? heroIn(2) : "opacity-0"}`}
           >
             APELSIN INDUSTRIAL — детейлинг-центр в Астане. Керамика, полировка, химчистка и защитные
             плёнки в тёплых боксах: принимаем и седаны, и тягачи с прицепами. Совершенство в каждой
             детали.
           </p>
-          <div
-            className={`mt-9 flex flex-wrap gap-3 ${ready ? "animate-[fade-in-up_0.6s_ease_both] [animation-delay:240ms]" : "opacity-0"}`}
-          >
+          <div className={`mt-9 flex flex-wrap gap-3 ${ready ? heroIn(3) : "opacity-0"}`}>
             <a href="#booking" className="btn-ember rounded-md px-8 py-4 text-sm">
               Запись онлайн
             </a>
@@ -337,7 +334,7 @@ function DetailingPage() {
 
           {filteredHeroStats.length > 0 && (
             <dl
-              className={`mt-14 grid max-w-2xl grid-cols-2 gap-6 sm:grid-cols-4 ${ready ? "animate-[fade-in-up_0.6s_ease_both] [animation-delay:300ms]" : "opacity-0"}`}
+              className={`mt-14 grid max-w-2xl grid-cols-2 gap-6 sm:grid-cols-4 ${ready ? heroIn(4) : "opacity-0"}`}
             >
               {filteredHeroStats.map(({ value, label }) => (
                 <div key={label}>

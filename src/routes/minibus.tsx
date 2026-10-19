@@ -18,9 +18,11 @@ import {
 import { ADDRESS, whatsappUrl } from "@/lib/business-info";
 import { getDirection } from "@/lib/directions";
 import { seoHead } from "@/lib/seo";
+import { heroIn } from "@/lib/hero-in";
 import {
   DirectionBooking,
   DirectionCtas,
+  RevealSection,
   DirectionServices,
 } from "@/components/site/direction-blocks";
 import { ContactsSection } from "@/components/site/contacts-section";
@@ -133,19 +135,23 @@ function MinibusPage() {
       <SiteHeader nav={nav} cta={{ label: "Оставить заявку", href: "#booking" }} />
 
       <section id="top" className="mx-auto max-w-6xl px-4 pt-16 sm:pt-24">
-        <p className="eyebrow">Микроавтобусы</p>
-        <h1 className="mt-4 max-w-3xl text-fluid-hero leading-[0.95] sm:text-7xl">
+        <p className={`eyebrow ${heroIn(0)}`}>Микроавтобусы</p>
+        <h1 className={`mt-4 max-w-3xl text-fluid-hero leading-[0.95] sm:text-7xl ${heroIn(1)}`}>
           <span className="text-primary">Детейлинг</span> микроавтобусов
         </h1>
-        <p className="mt-6 max-w-xl text-lg text-muted-foreground">
+        <p className={`mt-6 max-w-xl text-lg text-muted-foreground ${heroIn(2)}`}>
           Перетяжка салона и переделка салона под VIP.
         </p>
-        <DirectionCtas bookLabel="Обсудить проект" whatsappHref={MINIBUS_WHATSAPP} />
+        <DirectionCtas
+          bookLabel="Обсудить проект"
+          whatsappHref={MINIBUS_WHATSAPP}
+          className={heroIn(3)}
+        />
       </section>
 
       <DirectionServices direction={minibus} icons={serviceIcons} title="Что делаем" />
 
-      <section id="works" className="border-y border-border bg-graphite/40">
+      <RevealSection id="works" className="border-y border-border bg-graphite/40">
         <div className="mx-auto max-w-6xl px-4 py-24">
           <p className="eyebrow">Виды работ</p>
           <h2 className="mt-3 text-4xl sm:text-5xl">Что входит в работы с салоном</h2>
@@ -159,9 +165,9 @@ function MinibusPage() {
             ))}
           </div>
         </div>
-      </section>
+      </RevealSection>
 
-      <section id="order" className="mx-auto grid max-w-6xl gap-14 px-4 py-24 lg:grid-cols-2">
+      <RevealSection id="order" className="mx-auto grid max-w-6xl gap-14 px-4 py-24 lg:grid-cols-2">
         <div>
           <p className="eyebrow">Проекты</p>
           <h2 className="mt-3 text-4xl sm:text-5xl">Варианты переоборудования</h2>
@@ -189,7 +195,7 @@ function MinibusPage() {
             ))}
           </ol>
         </div>
-      </section>
+      </RevealSection>
 
       {/* Both this and the section above have no background: the line keeps them apart. */}
       <div className="border-t border-border">

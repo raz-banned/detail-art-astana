@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { heroIn } from "@/lib/hero-in";
 import { useEffect } from "react";
 import { ArrowRight, Check, MessageCircle, Star } from "lucide-react";
 import { GOALS, reachGoal } from "@/lib/analytics";
@@ -114,16 +115,14 @@ function Hub() {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/30" />
         <div className="relative mx-auto max-w-6xl px-4 py-28 sm:py-36">
-          <p className="eyebrow animate-[fade-in-up_0.6s_ease_both] [animation-delay:60ms]">
-            Астана · Apelsin Industrial Park · Алаш 46/2
-          </p>
-          <h1 className="mt-4 max-w-3xl animate-[fade-in-up_0.6s_ease_both] text-5xl leading-[0.95] [animation-delay:120ms] sm:text-7xl">
+          <p className={`eyebrow ${heroIn(0)}`}>Астана · Apelsin Industrial Park · Алаш 46/2</p>
+          <h1 className={`mt-4 max-w-3xl text-5xl leading-[0.95] sm:text-7xl ${heroIn(1)}`}>
             Добро пожаловать в<span className="text-primary"> Apelsin Industrial</span>
           </h1>
-          <p className="mt-6 max-w-xl animate-[fade-in-up_0.6s_ease_both] text-lg text-muted-foreground [animation-delay:180ms]">
+          <p className={`mt-6 max-w-xl text-lg text-muted-foreground ${heroIn(2)}`}>
             Детейлинг, грузовой сервис и металлоцех на одной территории в Астане.
           </p>
-          <div className="mt-9 flex animate-[fade-in-up_0.6s_ease_both] flex-wrap gap-3 [animation-delay:240ms]">
+          <div className={`mt-9 flex flex-wrap gap-3 ${heroIn(3)}`}>
             <a href="#directions" className="btn-ember rounded-md px-8 py-4 text-sm">
               Выбрать направление
             </a>

@@ -198,9 +198,11 @@
     transform 0.7s ease;
 }
 
+/* none, not translateY(0): any transform makes the section the containing block for
+   position: fixed descendants (popovers, overlays inside the booking form). */
 .reveal-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -208,6 +210,8 @@
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    /* Staggered entrances would still blink in one by one after their delays. */
+    animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
