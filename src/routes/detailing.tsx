@@ -306,7 +306,7 @@ function DetailingPage() {
             Астана · Apelsin Industrial Park · Алаш 46/2
           </p>
           <h1
-            className={`mt-4 max-w-2xl text-5xl leading-[0.95] sm:text-7xl ${ready ? "animate-[fade-in-up_0.6s_ease_both] [animation-delay:120ms]" : "opacity-0"}`}
+            className={`mt-4 max-w-2xl text-fluid-hero leading-[0.95] sm:text-7xl ${ready ? "animate-[fade-in-up_0.6s_ease_both] [animation-delay:120ms]" : "opacity-0"}`}
           >
             Детейлинг
             <span className="text-primary"> авто и фур</span>

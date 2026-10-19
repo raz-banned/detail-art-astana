@@ -16,8 +16,8 @@ export function DirectionCtas({
   whatsappHref: string;
 }) {
   return (
-    <div className="mt-9 flex flex-wrap gap-3">
-      <a href="#booking" className="btn-ember rounded-md px-8 py-4 text-sm">
+    <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+      <a href="#booking" className="btn-ember rounded-md px-6 py-4 text-center sm:px-8 text-sm">
         {bookLabel}
       </a>
       <a
@@ -25,7 +25,7 @@ export function DirectionCtas({
         onClick={() => reachGoal(GOALS.whatsappClick)}
         target="_blank"
         rel="noreferrer"
-        className="inline-flex items-center gap-2 rounded-md border border-border px-8 py-4 text-sm font-semibold tracking-widest uppercase transition-colors hover:border-primary hover:text-primary"
+        className="inline-flex items-center gap-2 rounded-md border border-border px-6 sm:px-8 py-4 justify-center text-sm font-semibold tracking-widest uppercase transition-colors hover:border-primary hover:text-primary"
       >
         <MessageCircle className="h-4 w-4" /> WhatsApp
       </a>

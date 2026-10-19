@@ -95,7 +95,7 @@ function MetalWorkshopPage() {
 
       <section id="top" className="mx-auto max-w-6xl px-4 pt-16 sm:pt-24">
         <p className="eyebrow">Металлообработка</p>
-        <h1 className="mt-4 max-w-3xl text-5xl leading-[0.95] sm:text-7xl">
+        <h1 className="mt-4 max-w-3xl text-fluid-hero leading-[0.95] sm:text-7xl">
           <span className="text-primary">Металлоцех</span> в Apelsin Industrial
         </h1>
         <p className="mt-6 max-w-xl text-lg text-muted-foreground">

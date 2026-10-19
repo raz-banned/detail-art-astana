@@ -66,7 +66,6 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-
 :root {
   --radius: 0.25rem;
   --background: oklch(0.14 0.004 285);
@@ -123,11 +122,23 @@
 
   h1,
   h2,
+  h3 {
+    hyphens: auto;
+    overflow-wrap: break-word;
+    text-wrap: balance;
+  }
+
+  h1,
+  h2,
   h3,
   .font-display {
     font-family: var(--font-display);
     letter-spacing: 0.02em;
   }
+}
+
+@utility text-fluid-hero {
+  font-size: clamp(2rem, 9vw, 3rem);
 }
 
 @utility surface-panel {
@@ -143,7 +154,9 @@
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  transition: transform 0.2s ease, filter 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
   &:hover {
     transform: translateY(-2px);
     filter: brightness(1.07);
@@ -180,7 +193,9 @@
 .reveal {
   opacity: 0;
   transform: translateY(24px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s ease;
 }
 
 .reveal-visible {
@@ -198,4 +213,3 @@
     scroll-behavior: auto !important;
   }
 }
-
