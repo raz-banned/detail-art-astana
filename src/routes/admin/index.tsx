@@ -549,10 +549,14 @@ function BookingCard({ booking: b }: { booking: Booking }) {
               {
                 onSuccess: () => {
                   const message = clientStatusMessage(status, b);
+                  // На телефоне в карточке уже есть кнопка «Написать клиенту», а тост с тем же действием
+                  // 15 секунд закрывает верх экрана. Тост императивный, CSS его не спрячет, поэтому
+                  // проверяем ширину прямо здесь (640px = `sm` в Tailwind).
+                  const isDesktop = window.matchMedia("(min-width: 640px)").matches;
                   // Opened from the toast's button click, so popup blockers let it through.
                   toast.success(
                     `Статус: ${bookingStatusLabel(status)}`,
-                    message
+                    message && isDesktop
                       ? {
                           duration: 15000,
                           action: {
