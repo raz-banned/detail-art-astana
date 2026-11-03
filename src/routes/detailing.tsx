@@ -25,6 +25,7 @@ import beforePaint from "@/assets/before-paint.jpg";
 import afterPaint from "@/assets/after-paint.jpg";
 import beforeInterior from "@/assets/before-interior.jpg";
 import afterInterior from "@/assets/after-interior.jpg";
+import heroVideo from "@/assets/gelik.webm";
 import { seoHead } from "@/lib/seo";
 import { useReveal } from "@/hooks/use-reveal";
 import { heroIn } from "@/lib/hero-in";
@@ -35,13 +36,23 @@ import { SiteHeader, type NavItem } from "@/components/site/site-header";
 import { WhatsAppFab } from "@/components/site/whatsapp-fab";
 
 export const Route = createFileRoute("/detailing")({
-  head: () =>
-    seoHead({
+  head: () => {
+    const seo = seoHead({
       path: "/detailing",
       title: "Детейлинг в Астане — APELSIN INDUSTRIAL",
       description:
         "Детейлинг в Apelsin Industrial Park, Астана, Алаш 46/2: запись онлайн и связь в WhatsApp.",
-    }),
+    });
+    // The hero poster is the LCP image, but a <video poster> isn't fetched with high priority
+    // the way the old <img fetchPriority="high"> was, so preload it explicitly.
+    return {
+      ...seo,
+      links: [
+        ...seo.links,
+        { rel: "preload", as: "image", href: heroImg, fetchPriority: "high" as const },
+      ],
+    };
+  },
   component: DetailingPage,
 });
 
@@ -262,6 +273,43 @@ function BeforeAfter({ before, after, label }: { before: string; after: string; 
   );
 }
 
+const HERO_MEDIA_CLASS =
+  "absolute inset-y-0 right-0 h-full w-full object-cover object-[50%_60%] opacity-60 mix-blend-lighten [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_60%,transparent)] lg:right-[max(4%,calc(50%-40rem))] lg:w-[55%] lg:max-w-[50rem] lg:opacity-100 lg:[mask-image:radial-gradient(closest-side_at_50%_55%,black_60%,transparent)]";
+
+// Hero background video: plays once and stays on its last frame (no loop, no controls). The
+// poster is what shows before the first frame, when the browser can't decode the file (older
+// Safari), when autoplay is refused, and under prefers-reduced-motion. No JS fallback needed.
+// `play` waits for the preloader to go, so the start of the short clip isn't hidden behind it.
+function HeroVideo({ play }: { play: boolean }) {
+  const ref = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = ref.current;
+    if (!video || !play) return;
+    // Reduced motion: stay on the poster.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    video.muted = true;
+    // A rejection means autoplay is blocked: the video simply stays on the poster.
+    video.play().catch(() => {});
+  }, [play]);
+
+  return (
+    <video
+      ref={ref}
+      muted
+      playsInline
+      poster={heroImg}
+      disablePictureInPicture
+      aria-hidden="true"
+      width={1080}
+      height={2352}
+      className={`pointer-events-none ${HERO_MEDIA_CLASS}`}
+    >
+      <source src={heroVideo} type="video/webm" />
+    </video>
+  );
+}
+
 function DetailingPage() {
   const nav: NavItem[] = [
     ["Услуги", "#services"],
@@ -289,16 +337,7 @@ function DetailingPage() {
       <SiteHeader nav={nav} cta={{ label: "Записаться", href: "#booking" }} ready={ready} />
 
       <section id="top" className="relative isolate overflow-hidden bg-background">
-        {/* Portrait photo: full-bleed on mobile, beside the text on desktop. `lighten` drops the
-            photo's own dark backdrop so only the lit car shows, and the mask fades the rest. */}
-        <img
-          src={heroImg}
-          alt=""
-          width={1179}
-          height={2564}
-          fetchPriority="high"
-          className="absolute inset-y-0 right-0 h-full w-full object-cover object-[50%_60%] opacity-60 mix-blend-lighten [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_60%,transparent)] lg:right-[max(4%,calc(50%-40rem))] lg:w-[55%] lg:max-w-[50rem] lg:opacity-100 lg:[mask-image:radial-gradient(closest-side_at_50%_55%,black_60%,transparent)]"
-        />
+        <HeroVideo play={ready} />
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/25 lg:via-background/40 lg:to-transparent" />
         <div className="relative mx-auto max-w-6xl px-4 py-28 sm:py-36">
           <p className={`eyebrow ${ready ? heroIn(0) : "opacity-0"}`}>
