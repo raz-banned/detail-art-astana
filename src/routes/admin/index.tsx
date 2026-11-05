@@ -37,6 +37,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -479,7 +480,17 @@ function AddBookingDialog() {
           </LabeledField>
         </form>
         {error && <p className="text-sm text-destructive">{error}</p>}
-        <DialogFooter>
+        <DialogFooter className="gap-2 sm:gap-0">
+          <DialogClose asChild>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={create.isPending}
+              onClick={() => setForm(emptyForm)}
+            >
+              Отмена
+            </Button>
+          </DialogClose>
           <Button type="submit" form="add-booking" disabled={create.isPending}>
             {create.isPending ? "Сохраняем…" : "Добавить"}
           </Button>
@@ -549,16 +560,16 @@ function BookingCard({ booking: b }: { booking: Booking }) {
               {
                 onSuccess: () => {
                   const message = clientStatusMessage(status, b);
-                  // На телефоне в карточке уже есть кнопка «Написать клиенту», а тост с тем же действием
-                  // 15 секунд закрывает верх экрана. Тост императивный, CSS его не спрячет, поэтому
-                  // проверяем ширину прямо здесь (640px = `sm` в Tailwind).
+                  // Кнопка в тосте нужна и на телефоне: при фильтре по статусу карточка исчезает
+                  // вместе со своей кнопкой. Но там тост закрывает верх экрана, поэтому живёт короче.
+                  // Тост императивный, CSS тут не поможет: проверяем ширину здесь (640px = `sm`).
                   const isDesktop = window.matchMedia("(min-width: 640px)").matches;
                   // Opened from the toast's button click, so popup blockers let it through.
                   toast.success(
                     `Статус: ${bookingStatusLabel(status)}`,
-                    message && isDesktop
+                    message
                       ? {
-                          duration: 15000,
+                          duration: isDesktop ? 15000 : 6000,
                           action: {
                             label: "Написать клиенту",
                             onClick: () =>
