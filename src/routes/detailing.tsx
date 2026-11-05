@@ -20,11 +20,13 @@ import {
 } from "lucide-react";
 
 import heroImg from "@/assets/hero-car.webp";
+import heroStartImg from "@/assets/hero-video-start.webp";
 import apelsinLogo from "@/assets/apelsin-logo.webp";
 import beforePaint from "@/assets/before-paint.jpg";
 import afterPaint from "@/assets/after-paint.jpg";
 import beforeInterior from "@/assets/before-interior.jpg";
 import afterInterior from "@/assets/after-interior.jpg";
+import heroVideo from "@/assets/gelik.webm";
 import { seoHead } from "@/lib/seo";
 import { useReveal } from "@/hooks/use-reveal";
 import { heroIn } from "@/lib/hero-in";
@@ -35,13 +37,23 @@ import { SiteHeader, type NavItem } from "@/components/site/site-header";
 import { WhatsAppFab } from "@/components/site/whatsapp-fab";
 
 export const Route = createFileRoute("/detailing")({
-  head: () =>
-    seoHead({
+  head: () => {
+    const seo = seoHead({
       path: "/detailing",
       title: "Детейлинг в Астане — APELSIN INDUSTRIAL",
       description:
         "Детейлинг в Apelsin Industrial Park, Астана, Алаш 46/2: запись онлайн и связь в WhatsApp.",
-    }),
+    });
+    // The hero poster is the LCP image, and a <video poster> isn't fetched with high priority
+    // the way an <img fetchPriority="high"> is, so preload it. Keep in sync with HeroVideo.
+    return {
+      ...seo,
+      links: [
+        ...seo.links,
+        { rel: "preload", as: "image", href: heroStartImg, fetchPriority: "high" as const },
+      ],
+    };
+  },
   component: DetailingPage,
 });
 
@@ -262,6 +274,74 @@ function BeforeAfter({ before, after, label }: { before: string; after: string; 
   );
 }
 
+// Portrait media: full-bleed on mobile, beside the text on desktop. `lighten` drops the media's
+// own dark backdrop so only the lit car shows, and the mask fades the rest.
+const HERO_MEDIA_CLASS =
+  "absolute inset-y-0 right-0 h-full w-full object-cover object-[50%_60%] opacity-60 mix-blend-lighten [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_60%,transparent)] lg:right-[max(4%,calc(50%-40rem))] lg:w-[55%] lg:max-w-[50rem] lg:opacity-100 lg:[mask-image:radial-gradient(closest-side_at_50%_55%,black_60%,transparent)]";
+
+const HERO_VIDEO_TYPE = 'video/webm; codecs="vp9"';
+
+// Hero background video: plays once and stays on its last frame (no loop, no controls). The
+// poster is the clip's dark first frame, so the start has no jump. When the clip won't play
+// (undecodable file, refused autoplay, prefers-reduced-motion) it's swapped for the lit photo.
+// `play` waits for the preloader to go, so the start of the short clip isn't hidden behind it.
+// Playback pauses while the tab is hidden and resumes on return, so the clip isn't missed.
+function HeroVideo({ play }: { play: boolean }) {
+  const ref = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = ref.current;
+    if (!video || !play) return;
+    // canPlayType, not the play() rejection: with no usable <source>, play() stays pending forever.
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reducedMotion || !video.canPlayType(HERO_VIDEO_TYPE)) {
+      video.poster = heroImg;
+      return;
+    }
+    video.muted = true;
+
+    const syncPlayback = () => {
+      // Return on ended video, so that the video doesn't get played again using the play call
+      if (video.ended) return;
+
+      if (document.visibilityState === "visible") {
+        video.play().catch((error: unknown) => {
+          // AbortError: pause() interrupted play() as the tab was hidden; it resumes on return.
+          if (error instanceof DOMException && error.name === "AbortError") return;
+          // No more retries: a later start would jump from the lit photo back to the dark frame.
+          document.removeEventListener("visibilitychange", syncPlayback);
+          video.poster = heroImg;
+        });
+      } else {
+        video.pause();
+      }
+    };
+
+    document.addEventListener("visibilitychange", syncPlayback);
+    syncPlayback();
+
+    return () => {
+      document.removeEventListener("visibilitychange", syncPlayback);
+    };
+  }, [play]);
+
+  return (
+    <video
+      ref={ref}
+      muted
+      playsInline
+      poster={heroStartImg}
+      disablePictureInPicture
+      aria-hidden="true"
+      width={1080}
+      height={2352}
+      className={`pointer-events-none ${HERO_MEDIA_CLASS}`}
+    >
+      <source src={heroVideo} type={HERO_VIDEO_TYPE} />
+    </video>
+  );
+}
+
 function DetailingPage() {
   const nav: NavItem[] = [
     ["Услуги", "#services"],
@@ -289,16 +369,7 @@ function DetailingPage() {
       <SiteHeader nav={nav} cta={{ label: "Записаться", href: "#booking" }} ready={ready} />
 
       <section id="top" className="relative isolate overflow-hidden bg-background">
-        {/* Portrait photo: full-bleed on mobile, beside the text on desktop. `lighten` drops the
-            photo's own dark backdrop so only the lit car shows, and the mask fades the rest. */}
-        <img
-          src={heroImg}
-          alt=""
-          width={1179}
-          height={2564}
-          fetchPriority="high"
-          className="absolute inset-y-0 right-0 h-full w-full object-cover object-[50%_60%] opacity-60 mix-blend-lighten [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_60%,transparent)] lg:right-[max(4%,calc(50%-40rem))] lg:w-[55%] lg:max-w-[50rem] lg:opacity-100 lg:[mask-image:radial-gradient(closest-side_at_50%_55%,black_60%,transparent)]"
-        />
+        <HeroVideo play={ready} />
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/25 lg:via-background/40 lg:to-transparent" />
         <div className="relative mx-auto max-w-6xl px-4 py-28 sm:py-36">
           <p className={`eyebrow ${ready ? heroIn(0) : "opacity-0"}`}>
