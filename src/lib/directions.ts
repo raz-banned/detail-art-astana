@@ -31,12 +31,35 @@ export function directionServices(slug: string): string[] {
   return DIRECTIONS.find((d) => d.slug === slug)?.services ?? [];
 }
 
+// Detailing services that read as truck work: /detailing lists them under their own heading, and
+// they should move to the truck service once it has enough content for its own page. Until then
+// they stay in the detailing list, so the booking form and the CRM still offer them.
+export const FUTURE_TRUCK_SERVICES = [
+  "Сварочные работы по автомобилю",
+  "Установка кран-балки",
+  "Переоборудование под автодом",
+];
+
 export const DIRECTIONS: Direction[] = [
   {
     slug: "detailing",
     title: "Детейлинг",
-    // TODO: the company hasn't listed detailing services yet.
-    services: [],
+    // TODO: "диагностика оборудования на лауднж" is left out until the company confirms the
+    // wording.
+    services: [
+      "Полировка кузова",
+      "Химчистка салона",
+      "Тонировка стёкол",
+      "Шумоизоляция автомобилей",
+      "Услуги выездного сервиса",
+      "Мелкий срочный ремонт",
+      "Перетяжка салона",
+      "Переделка салона под VIP",
+      "Сварочные работы по автомобилю",
+      "Установка кран-балки",
+      "Шиномонтаж",
+      "Переоборудование под автодом",
+    ],
     path: "/detailing",
   },
   {

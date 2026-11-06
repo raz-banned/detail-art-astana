@@ -59,41 +59,64 @@ function gridColumns(count: number): string {
   return "md:grid-cols-2 lg:grid-cols-3";
 }
 
+function ServiceCards({
+  services,
+  icons,
+}: {
+  services: string[];
+  icons: Record<string, LucideIcon>;
+}) {
+  return (
+    <div className={`mt-12 grid gap-5 ${gridColumns(services.length)}`}>
+      {services.map((service) => {
+        const Icon = icons[service] ?? Wrench;
+        return (
+          <article
+            key={service}
+            className="surface-panel group rounded-lg p-6 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-primary hover:shadow-[var(--shadow-panel)]"
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded bg-graphite text-primary transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground">
+              <Icon className="h-6 w-6" />
+            </div>
+            <h3 className="mt-5 text-2xl transition-colors duration-300 group-hover:text-primary">
+              {service}
+            </h3>
+          </article>
+        );
+      })}
+    </div>
+  );
+}
+
 // The direction's services from directions.ts, as cards. Icons are matched by service name, so
 // reordering the list doesn't shuffle them; an unknown service gets the Wrench. With no services
 // yet the section isn't rendered at all, rather than showing a heading over an empty grid.
+// `separate` moves the named services out of the main grid to their own group below it.
 export function DirectionServices({
   direction,
   icons,
   title,
+  separate,
 }: {
   direction: Direction;
   icons: Record<string, LucideIcon>;
   title: string;
+  separate?: { title: string; services: string[] };
 }) {
   if (direction.services.length === 0) return null;
+  const separated = direction.services.filter((s) => separate?.services.includes(s));
+  const main = direction.services.filter((s) => !separated.includes(s));
   return (
     <RevealSection id="services" className="mx-auto max-w-6xl px-4 py-24">
       <p className="eyebrow">Услуги</p>
       <h2 className="mt-3 text-4xl sm:text-5xl">{title}</h2>
-      <div className={`mt-12 grid gap-5 ${gridColumns(direction.services.length)}`}>
-        {direction.services.map((service) => {
-          const Icon = icons[service] ?? Wrench;
-          return (
-            <article
-              key={service}
-              className="surface-panel group rounded-lg p-6 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-primary hover:shadow-[var(--shadow-panel)]"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded bg-graphite text-primary transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground">
-                <Icon className="h-6 w-6" />
-              </div>
-              <h3 className="mt-5 text-2xl transition-colors duration-300 group-hover:text-primary">
-                {service}
-              </h3>
-            </article>
-          );
-        })}
-      </div>
+      <ServiceCards services={main} icons={icons} />
+      {separate && separated.length > 0 && (
+        <>
+          <h3 className="mt-16 text-3xl sm:text-4xl">{separate.title}</h3>
+          <ServiceCards services={separated} icons={icons} />
+        </>
+      )}
     </RevealSection>
   );
 }

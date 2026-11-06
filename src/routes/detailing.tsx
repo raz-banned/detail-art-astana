@@ -5,18 +5,21 @@ import { ADDRESS, DETAILING_WHATSAPP, HOURS, PHONE, PHONE_HREF } from "@/lib/bus
 
 import {
   Sparkles,
-  ShieldCheck,
   Car,
+  Caravan,
+  CircleDot,
+  Crown,
   Droplets,
-  SprayCan,
+  Flame,
+  Scissors,
   Sun,
+  VolumeX,
   Clock,
   MapPin,
   Phone,
-  Check,
   MessageCircle,
-  Truck,
   ArrowLeftRight,
+  type LucideIcon,
 } from "lucide-react";
 
 import heroImg from "@/assets/hero-car.webp";
@@ -27,11 +30,17 @@ import afterPaint from "@/assets/after-paint.jpg";
 import beforeInterior from "@/assets/before-interior.jpg";
 import afterInterior from "@/assets/after-interior.jpg";
 import heroVideo from "@/assets/gelik.webm";
+import { FUTURE_TRUCK_SERVICES, getDirection } from "@/lib/directions";
 import { seoHead } from "@/lib/seo";
 import { useReveal } from "@/hooks/use-reveal";
 import { heroIn } from "@/lib/hero-in";
 import { BookingForm } from "@/components/site/booking-form";
 import { ContactsSection } from "@/components/site/contacts-section";
+import {
+  DirectionCtas,
+  DirectionServices,
+  RevealSection,
+} from "@/components/site/direction-blocks";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader, type NavItem } from "@/components/site/site-header";
 import { WhatsAppFab } from "@/components/site/whatsapp-fab";
@@ -108,99 +117,30 @@ function Preloader({ onDone }: { onDone: () => void }) {
   );
 }
 
-const services = [
-  {
-    icon: Sparkles,
-    title: "Полировка кузова",
-    text: "Абразивная и защитная полировка: убираем риски, голограммы и мутность лака.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Керамическое покрытие",
-    text: "Керамика 9H до 3 лет: гидрофобный эффект, глубина цвета и лёгкая мойка.",
-  },
-  {
-    icon: Droplets,
-    title: "Химчистка салона",
-    text: "Полный разбор, экстракторная чистка, устранение запахов озоном.",
-  },
-  {
-    icon: Car,
-    title: "Антигравийная плёнка",
-    text: "Оклейка полиуретаном зон риска или всего кузова, самовосстановление.",
-  },
-  {
-    icon: Sun,
-    title: "Тонировка стёкол",
-    text: "Атермальные и тонирующие плёнки премиум-класса по ГОСТ.",
-  },
-  {
-    icon: Truck,
-    title: "Детейлинг грузовых фур",
-    text: "Мойка и полировка тягачей и прицепов, чистка кабины, защита хрома и пластика.",
-  },
-  {
-    icon: SprayCan,
-    title: "Реставрация фар и кожи",
-    text: "Полировка фар с защитой лаком, покраска и восстановление кожи салона.",
-  },
-];
+// The services come from the company (DIRECTIONS); only their icons are added here, keyed by
+// service name (see DirectionServices).
+const detailing = getDirection("detailing");
+const serviceIcons: Record<string, LucideIcon> = {
+  "Полировка кузова": Sparkles,
+  "Химчистка салона": Droplets,
+  "Тонировка стёкол": Sun,
+  "Шумоизоляция автомобилей": VolumeX,
+  "Услуги выездного сервиса": Car,
+  "Перетяжка салона": Scissors,
+  "Переделка салона под VIP": Crown,
+  "Сварочные работы по автомобилю": Flame,
+  Шиномонтаж: CircleDot,
+  "Переоборудование под автодом": Caravan,
+};
 
 // TODO: подтвердить у владельца. `value: null` hides the stat; only confirmed numbers go here.
 const heroStats: { value: string | null; label: string }[] = [
   { value: null, label: "авто в год" },
   { value: null, label: "на рынке" },
-  { value: null, label: "гарантия керамики" },
 ];
 const filteredHeroStats = heroStats.filter(
   (s): s is { value: string; label: string } => s.value !== null,
 );
-
-// TODO: подтвердить у владельца пакеты, состав и цены. `price` / `time` stay null until then:
-// the card shows "Цена по запросу" and no duration.
-const pricing: {
-  name: string;
-  price: string | null;
-  time: string | null;
-  popular?: boolean;
-  features: string[];
-}[] = [
-  {
-    name: "Экспресс",
-    price: null,
-    time: null,
-    features: [
-      "Двухфазная мойка кузова",
-      "Обезжиривание и защитный воск",
-      "Чистка стёкол и дисков",
-      "Влажная уборка салона",
-    ],
-  },
-  {
-    name: "Керамика 9H",
-    price: null,
-    time: null,
-    popular: true,
-    features: [
-      "Абразивная полировка в 2 шага",
-      "Керамика 9H, до 3 лет защиты",
-      "Гидрофоб на стёкла",
-      "Защита дисков и пластика",
-      "Бесплатная мойка каждые 3 месяца",
-    ],
-  },
-  {
-    name: "Салон под ноль",
-    price: null,
-    time: null,
-    features: [
-      "Разбор и химчистка всех поверхностей",
-      "Экстрактор + пароочиститель",
-      "Озонирование от запахов",
-      "Кондиционер для кожи",
-    ],
-  },
-];
 
 function BeforeAfter({ before, after, label }: { before: string; after: string; label: string }) {
   const [pos, setPos] = useState(50);
@@ -352,8 +292,6 @@ function DetailingPage() {
 
   const [ready, setReady] = useState(false);
 
-  const servicesReveal = useReveal<HTMLElement>();
-  const pricingReveal = useReveal<HTMLElement>();
   const galleryReveal = useReveal<HTMLElement>();
   const bookingReveal = useReveal<HTMLElement>();
 
@@ -379,14 +317,13 @@ function DetailingPage() {
             className={`mt-4 max-w-2xl text-fluid-hero leading-[0.95] sm:text-7xl ${ready ? heroIn(1) : "opacity-0"}`}
           >
             Детейлинг
-            <span className="text-primary"> авто и фур</span>
+            <span className="text-primary"> авто</span>
           </h1>
           <p
             className={`mt-6 max-w-xl text-lg text-muted-foreground ${ready ? heroIn(2) : "opacity-0"}`}
           >
-            APELSIN INDUSTRIAL — детейлинг-центр в Астане. Керамика, полировка, химчистка и защитные
-            плёнки в тёплых боксах: принимаем и седаны, и тягачи с прицепами. Совершенство в каждой
-            детали.
+            APELSIN INDUSTRIAL — детейлинг-центр в Астане. Полировка, химчистка, тонировка и
+            шумоизоляция. Совершенство в каждой детали.
           </p>
           <div className={`mt-9 flex flex-wrap gap-3 ${ready ? heroIn(3) : "opacity-0"}`}>
             <a href="#booking" className="btn-ember rounded-md px-8 py-4 text-sm">
@@ -420,86 +357,24 @@ function DetailingPage() {
         </div>
       </section>
 
-      <section
-        id="services"
-        ref={servicesReveal.ref}
-        className={`mx-auto max-w-6xl px-4 py-24 ${servicesReveal.className}`}
-      >
-        <p className="eyebrow">Услуги</p>
-        <h2 className="mt-3 text-4xl sm:text-5xl">Что делаем в боксах</h2>
-        <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {services.map(({ icon: Icon, title, text }) => (
-            <article
-              key={title}
-              className="surface-panel group rounded-lg p-6 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.05] hover:border-primary hover:shadow-[var(--shadow-panel)]"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded bg-graphite text-primary transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground">
-                <Icon className="h-6 w-6 transition-transform duration-300 group-hover:rotate-6" />
-              </div>
-              <h3 className="mt-5 text-2xl transition-colors duration-300 group-hover:text-primary">
-                {title}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{text}</p>
-            </article>
-          ))}
-        </div>
-      </section>
+      <DirectionServices
+        direction={detailing}
+        icons={serviceIcons}
+        title="Что делаем в боксах"
+        separate={{ title: "Также выполняем", services: FUTURE_TRUCK_SERVICES }}
+      />
 
-      <section
-        id="pricing"
-        ref={pricingReveal.ref}
-        className={`diag-stripes border-y border-border bg-graphite/40 ${pricingReveal.className}`}
-      >
+      {/* TODO: placeholder until the company confirms packages and prices. */}
+      <RevealSection id="pricing" className="diag-stripes border-y border-border bg-graphite/40">
         <div className="mx-auto max-w-6xl px-4 py-24">
           <p className="eyebrow">Цены</p>
-          <h2 className="mt-3 text-4xl sm:text-5xl">Пакеты и стоимость</h2>
+          <h2 className="mt-3 text-4xl sm:text-5xl">Стоимость</h2>
           <p className="mt-3 max-w-xl text-sm text-muted-foreground">
-            Прайс уточняется. Стоимость зависит от автомобиля и его состояния — назовём её после
-            осмотра.
+            Прайс уточняется. Оставьте заявку или напишите в WhatsApp, менеджер подскажет стоимость.
           </p>
-          <div className="mt-12 grid gap-5 lg:grid-cols-3">
-            {pricing.map((p) => (
-              <article
-                key={p.name}
-                className={`surface-panel relative flex h-full flex-col rounded-lg p-7 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[var(--shadow-panel)] ${p.popular ? "border-primary" : ""}`}
-              >
-                {p.popular && (
-                  <span className="absolute -top-3 left-7 rounded bg-primary px-3 py-1 text-xs font-bold tracking-widest text-primary-foreground uppercase">
-                    Хит
-                  </span>
-                )}
-                <h3 className="text-3xl">{p.name}</h3>
-                {p.time && (
-                  <p className="mt-2 flex items-center gap-2 text-xs tracking-wider text-muted-foreground uppercase">
-                    <Clock className="h-3.5 w-3.5" /> {p.time}
-                  </p>
-                )}
-                <p className="font-display mt-5 text-4xl text-primary">
-                  {p.price ?? "Цена по запросу"}
-                </p>
-                <ul className="mt-6 mb-6 space-y-3 text-sm">
-                  {p.features.map((f) => (
-                    <li key={f} className="flex gap-2 text-muted-foreground">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <a
-                  href="#booking"
-                  className={`mt-auto block rounded-md px-5 py-3 text-center text-xs font-semibold tracking-widest uppercase ${
-                    p.popular
-                      ? "btn-ember"
-                      : "border border-border transition-colors hover:border-primary hover:text-primary"
-                  }`}
-                >
-                  Выбрать пакет
-                </a>
-              </article>
-            ))}
-          </div>
+          <DirectionCtas bookLabel="Оставить заявку" whatsappHref={DETAILING_WHATSAPP} />
         </div>
-      </section>
+      </RevealSection>
 
       <section
         id="gallery"
@@ -512,16 +387,8 @@ function DetailingPage() {
           Потяните ползунок, чтобы увидеть результат.
         </p>
         <div className="mt-12 grid gap-6 md:grid-cols-2">
-          <BeforeAfter
-            before={beforePaint}
-            after={afterPaint}
-            label="Полировка + керамика 9H, кузов"
-          />
-          <BeforeAfter
-            before={beforeInterior}
-            after={afterInterior}
-            label="Химчистка салона с озонированием"
-          />
+          <BeforeAfter before={beforePaint} after={afterPaint} label="Полировка кузова" />
+          <BeforeAfter before={beforeInterior} after={afterInterior} label="Химчистка салона" />
         </div>
       </section>
 
@@ -559,7 +426,7 @@ function DetailingPage() {
               </li>
             </ul>
           </div>
-          <BookingForm direction="detailing" services={services.map((s) => s.title)} />
+          <BookingForm direction="detailing" services={detailing.services} />
         </div>
       </section>
 
