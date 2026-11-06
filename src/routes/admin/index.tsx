@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, isValid, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
+import { MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,6 +37,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -156,16 +158,22 @@ function FilterRow({
   field: "status" | "source" | "direction";
 }) {
   return (
-    <div role="group" aria-label={label} className="flex flex-wrap items-center gap-2">
-      <span className="w-28 text-sm text-muted-foreground">{label}</span>
-      <FilterChip active={value === "all"} onClick={() => onChange("all")}>
-        Все · {items.length}
-      </FilterChip>
-      {options.map((o) => (
-        <FilterChip key={o.value} active={value === o.value} onClick={() => onChange(o.value)}>
-          {o.label} · {items.filter((b) => b[field] === o.value).length}
+    <div role="group" aria-label={label} className="sm:flex sm:items-center sm:gap-2">
+      <p className="mb-1.5 text-xs text-muted-foreground sm:mb-0 sm:w-28 sm:shrink-0 sm:text-sm">
+        {label}
+      </p>
+      {/* One scrollable row on a phone (-mx-4 cancels <main>'s px-4, so it scrolls edge to edge);
+          wrapping rows from sm up. */}
+      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-1 sm:flex-wrap sm:overflow-visible sm:p-0">
+        <FilterChip active={value === "all"} onClick={() => onChange("all")}>
+          Все · {items.length}
         </FilterChip>
-      ))}
+        {options.map((o) => (
+          <FilterChip key={o.value} active={value === o.value} onClick={() => onChange(o.value)}>
+            {o.label} · {items.filter((b) => b[field] === o.value).length}
+          </FilterChip>
+        ))}
+      </div>
     </div>
   );
 }
@@ -185,7 +193,7 @@ function FilterChip({
       aria-pressed={active}
       onClick={onClick}
       className={cn(
-        "rounded-full border px-3 py-1 text-sm transition-colors",
+        "shrink-0 rounded-full border px-3 py-1 text-sm whitespace-nowrap transition-colors",
         active
           ? "border-primary bg-primary text-primary-foreground"
           : "border-border text-muted-foreground hover:border-primary hover:text-foreground",
@@ -472,7 +480,17 @@ function AddBookingDialog() {
           </LabeledField>
         </form>
         {error && <p className="text-sm text-destructive">{error}</p>}
-        <DialogFooter>
+        <DialogFooter className="gap-2 sm:gap-0">
+          <DialogClose asChild>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={create.isPending}
+              onClick={() => setForm(emptyForm)}
+            >
+              Отмена
+            </Button>
+          </DialogClose>
           <Button type="submit" form="add-booking" disabled={create.isPending}>
             {create.isPending ? "Сохраняем…" : "Добавить"}
           </Button>
@@ -542,12 +560,16 @@ function BookingCard({ booking: b }: { booking: Booking }) {
               {
                 onSuccess: () => {
                   const message = clientStatusMessage(status, b);
+                  // Кнопка в тосте нужна и на телефоне: при фильтре по статусу карточка исчезает
+                  // вместе со своей кнопкой. Но там тост закрывает верх экрана, поэтому живёт короче.
+                  // Тост императивный, CSS тут не поможет: проверяем ширину здесь (640px = `sm`).
+                  const isDesktop = window.matchMedia("(min-width: 640px)").matches;
                   // Opened from the toast's button click, so popup blockers let it through.
                   toast.success(
                     `Статус: ${bookingStatusLabel(status)}`,
                     message
                       ? {
-                          duration: 15000,
+                          duration: isDesktop ? 15000 : 6000,
                           action: {
                             label: "Написать клиенту",
                             onClick: () =>
@@ -565,7 +587,7 @@ function BookingCard({ booking: b }: { booking: Booking }) {
             )
           }
         >
-          <SelectTrigger className="w-40">
+          <SelectTrigger className="w-full sm:w-40">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -581,7 +603,7 @@ function BookingCard({ booking: b }: { booking: Booking }) {
       {clientMessage && (
         <Button asChild size="sm" variant="outline" className="mt-3">
           <a href={whatsappUrl(b.phone, clientMessage)} target="_blank" rel="noreferrer">
-            Сообщить клиенту в WhatsApp: {bookingStatusLabel(b.status).toLowerCase()}
+            <MessageCircle /> Написать клиенту
           </a>
         </Button>
       )}
