@@ -32,7 +32,8 @@ import { WhatsAppFab } from "@/components/site/whatsapp-fab";
 
 export const Route = createFileRoute("/minibus")({
   beforeLoad: () => {
-    if (!acceptsBookings("minibus")) throw redirect({ to: "/" });
+    // Its services moved to detailing, so old links land there rather than on the hub.
+    if (!acceptsBookings("minibus")) throw redirect({ to: "/detailing" });
   },
   head: () =>
     seoHead({
