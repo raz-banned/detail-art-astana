@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { ArrowRight, Check, MessageCircle, Star } from "lucide-react";
 import { GOALS, reachGoal } from "@/lib/analytics";
 import { TWO_GIS_RATING, TWO_GIS_REVIEWS, WHATSAPP } from "@/lib/business-info";
-import { DIRECTIONS, type Direction } from "@/lib/directions";
+import { DIRECTIONS, FUTURE_TRUCK_SERVICES, type Direction } from "@/lib/directions";
 import { seoHead } from "@/lib/seo";
 import { useReveal } from "@/hooks/use-reveal";
 import { ContactsSection } from "@/components/site/contacts-section";
@@ -50,12 +50,13 @@ function reviewCountLabel(count: number) {
 const reviews: { name: string; about: string; text: string; stars: 1 | 2 | 3 | 4 | 5 }[] = [];
 
 function DirectionCard({ direction }: { direction: Direction }) {
+  const services = direction.services.filter((s) => !FUTURE_TRUCK_SERVICES.includes(s));
   return (
     <article className="surface-panel flex flex-col rounded-lg p-6 sm:p-8">
       <h3 className="text-2xl sm:text-3xl">{direction.title}</h3>
-      {direction.services.length > 0 && (
+      {services.length > 0 && (
         <ul className="mt-6 space-y-3 text-sm text-muted-foreground">
-          {direction.services.map((s) => (
+          {services.map((s) => (
             <li key={s} className="flex gap-2">
               <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               {s}
