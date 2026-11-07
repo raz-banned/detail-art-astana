@@ -10,6 +10,11 @@ import type { DirectionSlug } from "./directions";
 // работы и выходные по каждому направлению.
 
 // Length of one slot. Every service takes exactly one slot for now.
+// TODO: the company wants 2-hour slots. Changing this number alone isn't enough: the unique index
+// only catches the same start time, so bookings_slot_start_on_hour must move to the 2-hour grid in
+// the same change (old bookings off the grid must go first, or the new check won't apply). Also
+// planned there: "Услуги выездного сервиса" takes a preferred time and no slot (not confirmed by
+// the company), which needs a new column, its grants, types.ts and a notify-booking deploy.
 export const SLOT_MINUTES = 60;
 
 // Working hours as whole hours in Astana time: the first slot starts at `open`, the last one
