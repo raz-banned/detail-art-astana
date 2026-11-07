@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import {
   ArrowUpDown,
   DoorOpen,
@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import workshopImg from "@/assets/metal-workshop.webp";
 import { ADDRESS, whatsappUrl } from "@/lib/business-info";
-import { getDirection } from "@/lib/directions";
+import { acceptsBookings, getDirection } from "@/lib/directions";
 import { seoHead } from "@/lib/seo";
 import { heroIn } from "@/lib/hero-in";
 import {
@@ -28,6 +28,9 @@ import { SiteHeader, type NavItem } from "@/components/site/site-header";
 import { WhatsAppFab } from "@/components/site/whatsapp-fab";
 
 export const Route = createFileRoute("/metal-workshop")({
+  beforeLoad: () => {
+    if (!acceptsBookings("metal-workshop")) throw redirect({ to: "/" });
+  },
   head: () =>
     seoHead({
       path: "/metal-workshop",

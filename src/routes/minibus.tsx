@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import {
   Armchair,
   Briefcase,
@@ -16,7 +16,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { ADDRESS, whatsappUrl } from "@/lib/business-info";
-import { getDirection } from "@/lib/directions";
+import { acceptsBookings, getDirection } from "@/lib/directions";
 import { seoHead } from "@/lib/seo";
 import { heroIn } from "@/lib/hero-in";
 import {
@@ -31,6 +31,10 @@ import { SiteHeader, type NavItem } from "@/components/site/site-header";
 import { WhatsAppFab } from "@/components/site/whatsapp-fab";
 
 export const Route = createFileRoute("/minibus")({
+  beforeLoad: () => {
+    // Its services moved to detailing, so old links land there rather than on the hub.
+    if (!acceptsBookings("minibus")) throw redirect({ to: "/detailing" });
+  },
   head: () =>
     seoHead({
       path: "/minibus",

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import {
   ClipboardCheck,
   Cog,
@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import truckImg from "@/assets/truck-hero.webp";
 import { ADDRESS, whatsappUrl } from "@/lib/business-info";
-import { getDirection } from "@/lib/directions";
+import { acceptsBookings, getDirection } from "@/lib/directions";
 import { seoHead } from "@/lib/seo";
 import { heroIn } from "@/lib/hero-in";
 import {
@@ -29,6 +29,9 @@ import { SiteHeader, type NavItem } from "@/components/site/site-header";
 import { WhatsAppFab } from "@/components/site/whatsapp-fab";
 
 export const Route = createFileRoute("/trucks")({
+  beforeLoad: () => {
+    if (!acceptsBookings("trucks")) throw redirect({ to: "/" });
+  },
   head: () =>
     seoHead({
       path: "/trucks",

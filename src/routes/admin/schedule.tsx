@@ -11,7 +11,7 @@ import {
   slotTime,
 } from "@/lib/booking-slots";
 import { bookingStatusLabel } from "@/lib/crm-config";
-import { DIRECTION_SLUGS, directionTitle } from "@/lib/directions";
+import { acceptsBookings, DIRECTION_SLUGS, directionTitle } from "@/lib/directions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,8 +22,9 @@ export const Route = createFileRoute("/admin/schedule")({
   component: SchedulePage,
 });
 
-// Columns: the directions that book time slots (see BOOKING_HOURS in booking-slots.ts).
-const SLOT_DIRECTIONS = DIRECTION_SLUGS.filter(hasSlots);
+// Columns: the directions that book time slots (see BOOKING_HOURS in booking-slots.ts) and still
+// take bookings.
+const SLOT_DIRECTIONS = DIRECTION_SLUGS.filter(hasSlots).filter(acceptsBookings);
 
 // Rows: every start time any direction has, so one table fits all their hours.
 const GRID_TIMES = [...new Set(SLOT_DIRECTIONS.flatMap(daySlots))].sort();
@@ -53,12 +54,14 @@ function buildSchedule(bookings: Booking[], day: string): Schedule {
       (b.slot_start ? slotDay(b.slot_start) === day : b.preferred_date === day),
   );
   for (const b of filteredBookings) {
-    // No time, or a direction without a column (dropped from BOOKING_HOURS): the list below.
-    if (!b.slot_start || !hasSlots(b.direction)) {
+    // No time, or a direction without a column (no slots, or closed): the list below. Without
+    // this, a booking of a closed direction would go to a cell that's never drawn and vanish.
+    const column = SLOT_DIRECTIONS.find((d) => d === b.direction);
+    if (!b.slot_start || !column) {
       unscheduled.push(b);
       continue;
     }
-    const key = cellKey(slotTime(b.slot_start), b.direction);
+    const key = cellKey(slotTime(b.slot_start), column);
     const values = cells.get(key);
 
     cells.set(key, values ? [...values, b] : [b]);

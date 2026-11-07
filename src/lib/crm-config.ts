@@ -2,7 +2,7 @@
 // Everything here is a draft: edit these lists instead of the admin components.
 
 import { ADDRESS } from "./business-info";
-import { DIRECTIONS, directionTitle } from "./directions";
+import { acceptsBookings, DIRECTIONS, directionTitle } from "./directions";
 
 // TODO: подтвердить у компании список статусов заявки и их порядок.
 // `value` is stored in bookings.status as plain text, so adding or reordering is safe.
@@ -67,6 +67,10 @@ export function bookingSourceLabel(value: string): string {
 }
 
 // bookings.direction holds a direction's slug; the list itself lives in directions.ts.
+// All of them, hidden ones included: the list's filter must still find old bookings.
 export const BOOKING_DIRECTIONS = DIRECTIONS.map((d) => ({ value: d.slug, label: d.title }));
+
+// Directions a manager can pick when adding a booking by hand.
+export const MANUAL_BOOKING_DIRECTIONS = BOOKING_DIRECTIONS.filter((d) => acceptsBookings(d.value));
 
 export const bookingDirectionLabel = directionTitle;

@@ -1,7 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { DIRECTIONS } from "@/lib/directions";
+import { PUBLIC_DIRECTIONS } from "@/lib/directions";
 
 export type NavItem = [label: string, href: string];
 
@@ -20,7 +20,7 @@ function SoonBadge() {
 }
 
 // Shared by every public page. `nav` holds the page's own section anchors; the "Направления"
-// menu comes from DIRECTIONS, so a new direction page shows up here once it gets a `path`.
+// menu comes from PUBLIC_DIRECTIONS, so a new direction page shows up here once it gets a `path`.
 export function SiteHeader({
   nav,
   cta,
@@ -109,7 +109,7 @@ export function SiteHeader({
                 className={`absolute top-full left-1/2 z-50 w-72 -translate-x-1/2 pt-4 transition-all duration-200 group-hover:visible group-hover:opacity-100 group-has-focus-visible:visible group-has-focus-visible:opacity-100 ${directionsOpen ? "visible opacity-100" : "invisible opacity-0"}`}
               >
                 <div className="surface-panel rounded-lg py-2 shadow-[var(--shadow-panel)]">
-                  {DIRECTIONS.map((d) =>
+                  {PUBLIC_DIRECTIONS.map((d) =>
                     d.path ? (
                       <Link
                         key={d.slug}
@@ -198,7 +198,7 @@ export function SiteHeader({
         </nav>
         <div className="flex flex-col gap-1 border-t border-border pt-6 text-lg">
           <p className="eyebrow px-3 pb-2">Направления</p>
-          {DIRECTIONS.map((d) =>
+          {PUBLIC_DIRECTIONS.map((d) =>
             d.path ? (
               <Link key={d.slug} to={d.path} onClick={closeMenu} className={menuItemClass}>
                 {d.title}

@@ -1,7 +1,9 @@
 // The park's directions: the hub homepage cards, the header menu and the footer are built from
-// this list. `services` holds only what the company provided; add a direction's `path` once its
-// page exists, until then it's shown as "скоро". `slug` is also stored in bookings.direction,
-// and the database only accepts these values (bookings_direction_check in
+// PUBLIC_DIRECTIONS. `services` holds only what the company provided; a direction with `path: null`
+// is shown as "скоро", and `public: false` hides it from the site. A hidden direction stays in
+// DIRECTIONS: its old bookings still need a title in the CRM, and the database only stores the
+// slug. Its page is kept too and redirects to the hub, see acceptsBookings().
+// The database only accepts these slugs in bookings.direction (bookings_direction_check in
 // supabase/sql/2026-10-09-bookings-direction.sql): adding or renaming one needs an SQL change.
 // The Telegram notification has its own copy of the titles (DIRECTION_TITLES in
 // supabase/functions/notify-booking/index.ts): update it and redeploy the function too.
@@ -13,6 +15,7 @@ export type Direction = {
   slug: DirectionSlug;
   title: string;
   services: string[];
+  public: boolean;
   path: "/detailing" | "/minibus" | "/metal-workshop" | "/trucks" | null;
 };
 
@@ -59,12 +62,14 @@ export const DIRECTIONS: Direction[] = [
       "Шиномонтаж",
       ...FUTURE_TRUCK_SERVICES,
     ],
+    public: true,
     path: "/detailing",
   },
   {
     slug: "minibus",
     title: "Детейлинг микроавтобусов",
     services: ["Перетяжка салона", "Переделка салона под VIP"],
+    public: false,
     path: "/minibus",
   },
   {
@@ -75,7 +80,9 @@ export const DIRECTIONS: Direction[] = [
       "Капитальный ремонт грузовой техники",
       "Переоборудование грузовой техники",
     ],
-    path: "/trucks",
+    public: true,
+    // TODO: back to "/trucks" once the page has enough confirmed content.
+    path: null,
   },
   {
     slug: "metal-workshop",
@@ -88,6 +95,19 @@ export const DIRECTIONS: Direction[] = [
       "Лазерная резка металла",
       "Здания из металлоконструкций под ключ",
     ],
+    public: false,
     path: "/metal-workshop",
   },
 ];
+
+// What the site shows: the hub cards, the header menu and the footer.
+export const PUBLIC_DIRECTIONS = DIRECTIONS.filter((d) => d.public);
+
+// Whether a direction takes new bookings. Decides if its page opens or redirects to the hub, if
+// the CRM's manual booking offers it, and if the schedule gets a column for it.
+export function acceptsBookings(slug: DirectionSlug): boolean {
+  const direction = getDirection(slug);
+
+  if (!direction.public || !direction.path) return false;
+  return true;
+}
