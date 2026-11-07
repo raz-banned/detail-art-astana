@@ -19,7 +19,7 @@ export function RevealSection({
   return <section {...props} ref={reveal.ref} className={cn(className, reveal.className)} />;
 }
 
-// The hero's two buttons: jump to the booking form, or open WhatsApp with the page's message.
+// Two buttons: jump to the booking form, or open WhatsApp with the page's message.
 // `className` lets the page add its entrance animation.
 export function DirectionCtas({
   bookLabel,
@@ -113,7 +113,7 @@ export function DirectionServices({
       <ServiceCards services={main} icons={icons} />
       {separate && separated.length > 0 && (
         <>
-          <h3 className="mt-16 text-3xl sm:text-4xl">{separate.title}</h3>
+          <h2 className="mt-16 text-3xl sm:text-4xl">{separate.title}</h2>
           <ServiceCards services={separated} icons={icons} />
         </>
       )}

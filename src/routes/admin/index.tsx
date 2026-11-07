@@ -225,7 +225,7 @@ const OTHER_SERVICE = "__other__";
 const NO_TIME = "__none__";
 
 // The service to store: the chosen item, or the typed text for "Другое". A direction without a
-// services list (detailing for now) stores its title, the same as the public BookingForm does.
+// services list stores its title, the same as the public BookingForm does.
 // An empty result is caught by bookingSchema's "Укажите услугу".
 function resolveService(form: typeof emptyForm): string {
   if (directionServices(form.direction).length === 0) return directionTitle(form.direction);

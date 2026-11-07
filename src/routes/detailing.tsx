@@ -360,7 +360,7 @@ function DetailingPage() {
       <DirectionServices
         direction={detailing}
         icons={serviceIcons}
-        title="Что делаем в боксах"
+        title="Что делаем"
         separate={{ title: "Также выполняем", services: FUTURE_TRUCK_SERVICES }}
       />
 
@@ -400,10 +400,9 @@ function DetailingPage() {
         <div className="grid gap-10 lg:grid-cols-2">
           <div>
             <p className="eyebrow">Запись</p>
-            <h2 className="mt-3 text-4xl sm:text-5xl">Забронируйте место в боксе</h2>
+            <h2 className="mt-3 text-4xl sm:text-5xl">Записаться</h2>
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-              Оставьте заявку — перезвоним в течение 15 минут, подберём пакет и назовём точную
-              стоимость по вашему авто. Загруженность бокса: 2–3 машины в день.
+              Оставьте заявку — менеджер свяжется с вами.
             </p>
             <ul className="mt-8 space-y-4 text-sm">
               <li className="flex gap-3">
