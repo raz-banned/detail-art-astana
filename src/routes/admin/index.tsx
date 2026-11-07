@@ -240,7 +240,8 @@ function resolveService(form: typeof emptyForm): string {
 // Keys are checked in order and only the first issue is shown, so direction goes first: the
 // service select is disabled until a direction is chosen, and its error would point nowhere.
 const manualBookingSchema = z.object({
-  // No default: a manual booking for the truck service mustn't silently become detailing.
+  // Preselected only when a single direction is on offer (defaultDirection): with a choice, a
+  // booking for another direction mustn't silently become the first one.
   direction: z.enum(DIRECTION_SLUGS, { message: "Выберите направление" }),
   ...bookingSchema.shape,
   source: z.string().min(1, "Выберите источник"),
