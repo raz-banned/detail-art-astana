@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { ArrowRight, Check, MessageCircle, Star } from "lucide-react";
 import { GOALS, reachGoal } from "@/lib/analytics";
 import { TWO_GIS_RATING, TWO_GIS_REVIEWS, WHATSAPP } from "@/lib/business-info";
-import { DIRECTIONS, FUTURE_TRUCK_SERVICES, type Direction } from "@/lib/directions";
+import { FUTURE_TRUCK_SERVICES, PUBLIC_DIRECTIONS, type Direction } from "@/lib/directions";
 import { seoHead } from "@/lib/seo";
 import { useReveal } from "@/hooks/use-reveal";
 import { ContactsSection } from "@/components/site/contacts-section";
@@ -17,9 +17,9 @@ export const Route = createFileRoute("/")({
   head: () =>
     seoHead({
       path: "/",
-      title: "APELSIN INDUSTRIAL — детейлинг, грузовой сервис и металлоцех в Астане",
+      title: "APELSIN INDUSTRIAL — детейлинг и грузовой сервис в Астане",
       description:
-        "Apelsin Industrial Park, Астана, Алаш 46/2: детейлинг авто и микроавтобусов, ремонт и переоборудование грузовой техники, металлоцех с лазерной резкой и сваркой.",
+        "Apelsin Industrial Park, Астана, Алаш 46/2: детейлинг авто, скоро грузовой сервис.",
     }),
   component: Hub,
 });
@@ -121,7 +121,7 @@ function Hub() {
             Добро пожаловать в<span className="text-primary"> Apelsin Industrial</span>
           </h1>
           <p className={`mt-6 max-w-xl text-lg text-muted-foreground ${heroIn(2)}`}>
-            Детейлинг, грузовой сервис и металлоцех на одной территории в Астане.
+            Детейлинг и грузовой сервис на одной территории в Астане.
           </p>
           <div className={`mt-9 flex flex-wrap gap-3 ${heroIn(3)}`}>
             <a href="#directions" className="btn-ember rounded-md px-8 py-4 text-sm">
@@ -148,7 +148,7 @@ function Hub() {
         <p className="eyebrow">Направления</p>
         <h2 className="mt-3 text-4xl sm:text-5xl">Выберите направление</h2>
         <div className="mt-12 grid gap-5 md:grid-cols-2">
-          {DIRECTIONS.map((d) => (
+          {PUBLIC_DIRECTIONS.map((d) => (
             <DirectionCard key={d.slug} direction={d} />
           ))}
         </div>

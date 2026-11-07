@@ -10,7 +10,7 @@ import {
   SOCIAL_LINKS,
   WHATSAPP,
 } from "@/lib/business-info";
-import { DIRECTIONS } from "@/lib/directions";
+import { PUBLIC_DIRECTIONS } from "@/lib/directions";
 import { useReveal } from "@/hooks/use-reveal";
 
 export function SiteFooter() {
@@ -27,14 +27,14 @@ export function SiteFooter() {
             APELSIN<span className="text-primary">.</span>INDUSTRIAL
           </Link>
           <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
-            Apelsin Industrial Park, Астана: детейлинг, грузовой сервис и металлоцех.
+            Apelsin Industrial Park, Астана: детейлинг и грузовой сервис.
           </p>
         </div>
 
         <nav aria-label="Направления">
           <p className="eyebrow">Направления</p>
           <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-            {DIRECTIONS.map((d) => (
+            {PUBLIC_DIRECTIONS.map((d) => (
               <li key={d.slug}>
                 {d.path ? (
                   <Link to={d.path} className="hover:text-primary">

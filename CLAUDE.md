@@ -46,8 +46,8 @@ error-boundary components) — never create `src/pages/` or Next.js/Remix-style 
 file-based routing conventions (dynamic `$id`, optional `{-$category}`, splat `$.tsx`, `_layout.tsx`).
 
 The homepage (`src/routes/index.tsx`) is a hub for the whole park: cards for each direction, built
-from `DIRECTIONS` in `src/lib/directions.ts` (which also feeds the header menu and footer; a
-direction without a `path` shows as "скоро"). Each direction gets its own page, e.g.
+from `DIRECTIONS` in `src/lib/directions.ts` (which also feeds the header menu and footer; a direction without a `path` shows as "скоро", and `public: false` hides it from the site while
+the CRM keeps its title for old bookings). Each direction gets its own page, e.g.
 `src/routes/detailing.tsx`, with its content arrays defined inline. Shared site parts live in
 `src/components/site/` (header, footer, contacts, WhatsApp button, `BookingForm`). The other public
 page is `src/routes/privacy.tsx` (privacy policy for the booking form's personal data); `/admin` is

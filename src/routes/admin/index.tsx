@@ -22,6 +22,7 @@ import { BUSY_SLOTS_KEY, useBusySlots } from "@/lib/use-busy-slots";
 import { DIRECTION_SLUGS, directionServices, directionTitle } from "@/lib/directions";
 import {
   BOOKING_DIRECTIONS,
+  MANUAL_BOOKING_DIRECTIONS,
   BOOKING_SOURCES,
   BOOKING_STATUSES,
   MANUAL_BOOKING_SOURCES,
@@ -204,6 +205,10 @@ function FilterChip({
   );
 }
 
+// With a single direction on offer there's nothing to choose, so it starts selected.
+const defaultDirection: string =
+  MANUAL_BOOKING_DIRECTIONS.length === 1 ? (MANUAL_BOOKING_DIRECTIONS[0]?.value ?? "") : "";
+
 const emptyForm = {
   name: "",
   phone: "",
@@ -216,7 +221,7 @@ const emptyForm = {
   // "HH:MM" from the direction's slots, or NO_TIME.
   time: "",
   source: MANUAL_BOOKING_SOURCES[0]?.value ?? "",
-  direction: "",
+  direction: defaultDirection,
 };
 
 // Select value for a service outside the direction's list; can't be "" (Radix reserves it).
@@ -369,7 +374,7 @@ function AddBookingDialog() {
                 <SelectValue placeholder="Выберите" />
               </SelectTrigger>
               <SelectContent>
-                {BOOKING_DIRECTIONS.map((d) => (
+                {MANUAL_BOOKING_DIRECTIONS.map((d) => (
                   <SelectItem key={d.value} value={d.value}>
                     {d.label}
                   </SelectItem>
