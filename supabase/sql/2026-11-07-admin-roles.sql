@@ -5,8 +5,8 @@
 -- After running it, update src/integrations/supabase/types.ts (admins.role, has_role).
 
 -- 1. The role. Existing staff become managers; set the owner and the accountant by hand (step 4).
--- The list is checked here because policies will depend on it: a typo like 'Owner' must fail
--- loudly instead of silently giving no access.
+-- The CHECK guards only stored values, not role names written in policies; that's why
+-- 2026-11-11-admin-roles-enum.sql later replaces it with an enum.
 alter table public.admins
   add column role text not null default 'manager'
   constraint admins_role_check check (role in ('manager', 'owner', 'accountant'));
@@ -35,6 +35,7 @@ grant execute on function public.has_role(text[]) to authenticated;
 -- 3. Check: the column, the constraint and the function exist; every staff user is a manager.
 -- select user_id, role from public.admins;
 -- select public.has_role(array['manager']); -- in the SQL Editor auth.uid() is null: false
+-- (Only before 2026-11-11-admin-roles-enum.sql; after it, see that file's checks.)
 
 -- 4. Give roles (by the user's email in Authentication → Users):
 -- update public.admins set role = 'owner'

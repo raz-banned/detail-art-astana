@@ -121,9 +121,14 @@ function AdminLayout() {
               </nav>
             </div>
             <div className="flex items-center gap-3 text-sm">
-              <span className="hidden text-muted-foreground sm:inline">
-                {session.user.email}
-                {role.data && ` · ${staffRoleLabel(role.data)}`}
+              <span className="text-muted-foreground">
+                <span className="hidden sm:inline">{session.user.email}</span>
+                {role.data && (
+                  <span>
+                    <span className="hidden sm:inline"> · </span>
+                    {staffRoleLabel(role.data)}
+                  </span>
+                )}
               </span>
               <Link to="/" className="text-muted-foreground hover:text-primary">
                 Сайт
