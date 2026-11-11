@@ -17,14 +17,17 @@ export type Database = {
       admins: {
         Row: {
           created_at: string
+          role: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          role?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          role?: string
           user_id?: string
         }
         Relationships: []
@@ -83,6 +86,7 @@ export type Database = {
         Args: { p_direction: string; p_from: string; p_to: string }
         Returns: string[]
       }
+      has_role: { Args: { p_roles: string[] }; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
