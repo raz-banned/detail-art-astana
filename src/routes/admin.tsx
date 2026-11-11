@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Toaster } from "@/components/ui/sonner";
+import { staffRoleLabel, useStaffRole } from "@/lib/staff-roles";
 
 // CRM for staff. Access control is enforced by Supabase RLS (see supabase/sql/);
 // this layout only decides what to show. The session lives in the browser, so the
@@ -63,6 +64,8 @@ function AdminLayout() {
     },
   });
 
+  const role = useStaffRole(userId, isAdmin.data === true);
+
   const signOut = async () => {
     await supabase.auth.signOut();
   };
@@ -118,7 +121,15 @@ function AdminLayout() {
               </nav>
             </div>
             <div className="flex items-center gap-3 text-sm">
-              <span className="hidden text-muted-foreground sm:inline">{session.user.email}</span>
+              <span className="text-muted-foreground">
+                <span className="hidden sm:inline">{session.user.email}</span>
+                {role.data && (
+                  <span>
+                    <span className="hidden sm:inline"> · </span>
+                    {staffRoleLabel(role.data)}
+                  </span>
+                )}
+              </span>
               <Link to="/" className="text-muted-foreground hover:text-primary">
                 Сайт
               </Link>
