@@ -167,6 +167,15 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      revenue_by_day: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          done_count: number
+          done_day: string
+          revenue: number
+          unpriced_count: number
+        }[]
+      }
       set_booking_price: {
         Args: { p_booking_id: string; p_price: number; p_reason?: string }
         Returns: undefined
