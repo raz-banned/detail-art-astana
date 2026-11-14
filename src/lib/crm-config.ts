@@ -12,8 +12,8 @@ import { acceptsBookings, DIRECTIONS, directionTitle } from "./directions";
 // (bookings_direction_slot_unique and busy_slots in supabase/sql/2026-10-15-bookings-slots.sql).
 // A new closing status (e.g. a no-show) keeps its slot taken unless that SQL is changed as well.
 export const BOOKING_STATUSES = [
-  { value: "new", label: "Новая" },
-  { value: "in_progress", label: "В работе" },
+  { value: "new", label: "Новая, без оценки" },
+  { value: "in_progress", label: "Осмотр и оценка" },
   { value: "scheduled", label: "Записан" },
   { value: "ready_for_pickup", label: "Готов к выдаче" },
   { value: "done", label: "Выполнена" },
