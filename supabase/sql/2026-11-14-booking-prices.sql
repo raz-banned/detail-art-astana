@@ -16,6 +16,13 @@
 alter table public.bookings add column done_at timestamptz;
 alter table public.bookings add column price_locked_at timestamptz;
 
+-- Existing bookings: the real moments are unknown. Already agreed bookings are locked from now;
+-- done ones get their slot (or creation) time as an approximate done_at, so they aren't missing
+-- from revenue if a price is entered for them later.
+update public.bookings set price_locked_at = now()
+  where status in ('scheduled', 'ready_for_pickup', 'done');
+update public.bookings set done_at = coalesce(slot_start, created_at) where status = 'done';
+
 -- 2. The price lives in its own table, not in a bookings column.
 -- Grants go to database roles, and every staff user is the same role (authenticated), so a
 -- column grant can't hide a price from a manager while showing it to the owner. RLS can tell
@@ -31,9 +38,11 @@ create table public.booking_prices (
 
 -- 3. Every price change, so a change after the client agreed leaves a trace (like an addendum to
 -- a work order on paper). Only set_booking_price() writes here; nobody can edit or delete rows.
+-- on delete restrict: a booking with price history can't be deleted, so the trail can't vanish
+-- with it (staff have no DELETE on bookings anyway; this also covers the SQL Editor).
 create table public.booking_price_changes (
   id bigint generated always as identity primary key,
-  booking_id uuid not null references public.bookings (id) on delete cascade,
+  booking_id uuid not null references public.bookings (id) on delete restrict,
   old_price integer,
   new_price integer not null,
   reason text,
@@ -59,8 +68,10 @@ create policy "Owner and accountant can read price changes" on public.booking_pr
   using ((select public.has_role('{owner,accountant}')));
 
 -- 4. Status changes on bookings: done_at, the price lock, and who may undo "done".
--- Only on UPDATE: nobody has an INSERT grant on status, so a new booking is always 'new'.
--- Fires only when the UPDATE sets status, so a note edit doesn't touch the timestamps.
+-- Through the API a new booking is always 'new' (nobody has an INSERT grant on status), but rows
+-- inserted in the SQL Editor or by the service role may not be, so INSERT runs it too. There OLD
+-- is null, hence `is distinct from` instead of `<>`.
+-- On UPDATE it fires only when status is set, so a note edit doesn't touch the timestamps.
 -- Statuses are plain text (see BOOKING_STATUSES in src/lib/crm-config.ts); the lock statuses
 -- here must follow that list if it changes.
 create or replace function public.bookings_status_guard()
@@ -75,7 +86,7 @@ begin
   -- Undoing "done" takes money out of revenue: owner and accountant only.
   -- auth.uid() is null in the SQL Editor and for the service role: those are trusted.
   -- (anon also has no uid, but anon has no UPDATE grant on bookings at all.)
-  if old.status = 'done' and new.status <> 'done'
+  if tg_op = 'UPDATE' and old.status = 'done' and new.status <> 'done'
      and auth.uid() is not null
      and not public.has_role('{owner,accountant}') then
     raise exception 'Only the owner or the accountant can undo a done booking'
@@ -83,7 +94,7 @@ begin
   end if;
 
   -- Done again after an undo gets a new time: revenue follows the current state.
-  if new.status = 'done' and old.status <> 'done' then
+  if new.status = 'done' and old.status is distinct from 'done' then
     new.done_at := now();
   elsif new.status <> 'done' then
     new.done_at := null;
@@ -103,7 +114,7 @@ $$;
 revoke execute on function public.bookings_status_guard() from public, anon, authenticated;
 
 create trigger bookings_status_guard
-  before update of status on public.bookings
+  before insert or update of status on public.bookings
   for each row execute function public.bookings_status_guard();
 
 -- 5. Setting a price: the only way to write booking_prices, so the lock and the log can't be
@@ -122,27 +133,35 @@ as $$
 declare
   v_locked boolean;
   v_old_price integer;
+  -- Blank counts as no reason; the check and the log use this same value.
+  v_reason text := nullif(btrim(p_reason), '');
 begin
   if not (select public.has_role('{owner,accountant}')) then
     raise exception 'Only the owner or the accountant can set a price' using errcode = '42501';
   end if;
 
+  if p_price is null then
+    raise exception 'Price is required' using errcode = '22023';
+  end if;
+
   -- for update: two people saving a price for the same booking at once are done one after the
   -- other, so the log's old_price is always the price that was really replaced.
-  select b.price_locked_at is not null into v_locked
-    from public.bookings b where b.id = p_booking_id for update;
+  select b.price_locked_at is not null, bp.price into v_locked, v_old_price
+    from public.bookings b
+    left join public.booking_prices bp on bp.booking_id = b.id
+    where b.id = p_booking_id
+    for update of b;
   if not found then
     raise exception 'Booking % not found', p_booking_id using errcode = 'P0002';
   end if;
-
-  select bp.price into v_old_price
-    from public.booking_prices bp where bp.booking_id = p_booking_id;
 
   if v_old_price is not distinct from p_price then
     return;
   end if;
 
-  if v_locked and v_old_price is not null and nullif(btrim(p_reason), '') is null then
+  -- Once the client agreed, a change needs a reason. The first price on a locked booking
+  -- doesn't: nothing agreed is being replaced.
+  if v_locked and v_old_price is not null and v_reason is null then
     raise exception 'Must provide a reason, to change the locked price' using errcode = '22023';
   end if;
 
@@ -153,7 +172,7 @@ begin
 
   insert into public.booking_price_changes
       (booking_id, old_price, new_price, reason, locked, changed_by)
-    values (p_booking_id, v_old_price, p_price, nullif(btrim(p_reason), ''), v_locked, auth.uid());
+    values (p_booking_id, v_old_price, p_price, v_reason, v_locked, auth.uid());
 end;
 $$;
 

@@ -57,7 +57,11 @@ export function useUpdateBooking() {
         // Bringing a cancelled booking back while someone else holds its slot.
         isSlotTaken(error)
           ? "Это время уже занято другой записью. Сначала отмените её."
-          : "Не удалось сохранить. Попробуйте ещё раз.",
+          : // The only 42501 the CRM's updates can hit: a manager undoing "done"
+            // (bookings_status_guard in supabase/sql/2026-11-14-booking-prices.sql).
+            (error as { code?: string } | null)?.code === "42501"
+            ? "Отменить выполнение может только владелец или бухгалтер."
+            : "Не удалось сохранить. Попробуйте ещё раз.",
       ),
   });
 }
