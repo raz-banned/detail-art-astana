@@ -5,6 +5,8 @@ import { ADDRESS } from "./business-info";
 import { acceptsBookings, DIRECTIONS, directionTitle } from "./directions";
 
 // TODO: подтвердить у компании список статусов заявки и их порядок.
+// The labels of "new" and "in_progress" (before the price is agreed) are our draft too, not the
+// company's wording; existing "in_progress" rows keep the value and now read as an estimate.
 // `value` is stored in bookings.status as plain text, so adding or reordering is safe.
 // Renaming a `value` that is already in use needs one SQL update of existing rows.
 // "new" must stay: the public booking form's RLS policy only allows status = 'new'.
