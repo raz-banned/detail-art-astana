@@ -54,6 +54,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import {
+  formatPrice,
+  MAX_PRICE,
+  useBookingPrices,
+  useCanSeePrices,
+  useSetBookingPrice,
+} from "@/lib/booking-prices";
 
 export const Route = createFileRoute("/admin/")({
   component: BookingsPage,
@@ -517,6 +524,7 @@ function LabeledField({ id, label, children }: { id: string; label: string; chil
 
 function BookingCard({ booking: b }: { booking: Booking }) {
   const update = useUpdateBooking();
+  const canSeePrices = useCanSeePrices();
   const [note, setNote] = useState(b.note ?? "");
   // Follow the saved note when a refetch brings another manager's edit, so saving a stale
   // draft doesn't silently overwrite it.
@@ -626,6 +634,8 @@ function BookingCard({ booking: b }: { booking: Booking }) {
         )}
       </dl>
 
+      {canSeePrices && <BookingPrice booking={b} />}
+
       <div className="mt-3 space-y-2">
         <Textarea
           value={note}
@@ -655,6 +665,89 @@ function BookingCard({ booking: b }: { booking: Booking }) {
         )}
       </div>
     </li>
+  );
+}
+
+// Owner and accountant only (the card renders it only for them; the database enforces it).
+function BookingPrice({ booking: b }: { booking: Booking }) {
+  const prices = useBookingPrices(true);
+  const setPrice = useSetBookingPrice();
+  const saved = prices.data?.get(b.id);
+  const [draft, setDraft] = useState(saved?.toString() ?? "");
+  const [reason, setReason] = useState("");
+  // Follow the saved price when a refetch brings another user's change, like the note.
+  useEffect(() => setDraft(saved?.toString() ?? ""), [saved]);
+
+  const price = draft.trim() === "" ? null : Number(draft);
+  const valid = price !== null && Number.isInteger(price) && price >= 0 && price <= MAX_PRICE;
+  const changed = valid && price !== saved;
+  const locked = b.price_locked_at !== null;
+
+  // Same rule as set_booking_price(): after the client agreed, replacing a saved price (0 too,
+  // e.g. warranty work) needs a reason; the first price on an agreed booking doesn't.
+  const needsReason = changed && locked && saved !== undefined;
+
+  const canSave = changed && (!needsReason || reason.trim() !== "");
+
+  if (prices.isPending) return null;
+  // Without the saved prices, an empty field would look like "no price yet": a price typed into it
+  // would replace one the user can't see. So no field at all until the prices load.
+  if (prices.isError) {
+    return <p className="mt-3 text-sm text-destructive">Не удалось загрузить цену.</p>;
+  }
+
+  return (
+    <div className="mt-3 space-y-2 rounded-md bg-muted/50 p-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <Label htmlFor={`price-${b.id}`} className="text-sm text-muted-foreground">
+          Цена, ₸
+        </Label>
+        <Input
+          id={`price-${b.id}`}
+          inputMode="numeric"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value.replace(/\D/g, ""))}
+          placeholder="не указана"
+          className="w-36"
+        />
+        {saved !== undefined && !changed && <span className="text-sm">{formatPrice(saved)}</span>}
+        {locked && <Badge variant="outline">Согласована</Badge>}
+      </div>
+      {needsReason && (
+        <Input
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder="Причина изменения (обязательно)"
+          maxLength={500}
+        />
+      )}
+      {changed && (
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            disabled={!canSave || setPrice.isPending}
+            onClick={() =>
+              setPrice.mutate(
+                { bookingId: b.id, price: price!, ...(needsReason ? { reason } : {}) },
+                { onSuccess: () => setReason("") },
+              )
+            }
+          >
+            Сохранить цену
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => {
+              setDraft(saved?.toString() ?? "");
+              setReason("");
+            }}
+          >
+            Отмена
+          </Button>
+        </div>
+      )}
+    </div>
   );
 }
 

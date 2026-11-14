@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Toaster } from "@/components/ui/sonner";
+import { StaffRoleContext } from "@/lib/booking-prices";
 import { staffRoleLabel, useStaffRole } from "@/lib/staff-roles";
 
 // CRM for staff. Access control is enforced by Supabase RLS (see supabase/sql/);
@@ -140,7 +141,9 @@ function AdminLayout() {
           </div>
         </header>
         <main className="mx-auto max-w-5xl px-4 py-6">
-          <Outlet />
+          <StaffRoleContext.Provider value={role.data}>
+            <Outlet />
+          </StaffRoleContext.Provider>
         </main>
       </>
     );
