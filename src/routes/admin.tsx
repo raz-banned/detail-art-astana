@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Toaster } from "@/components/ui/sonner";
-import { StaffRoleContext } from "@/lib/booking-prices";
-import { staffRoleLabel, useStaffRole } from "@/lib/staff-roles";
+import { StaffRoleContext, staffRoleLabel, useStaffRole } from "@/lib/staff-roles";
 
 // CRM for staff. Access control is enforced by Supabase RLS (see supabase/sql/);
 // this layout only decides what to show. The session lives in the browser, so the

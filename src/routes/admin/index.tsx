@@ -58,9 +58,10 @@ import {
   formatPrice,
   MAX_PRICE,
   useBookingPrices,
-  useCanSeePrices,
   useSetBookingPrice,
+  type BookingPrices,
 } from "@/lib/booking-prices";
+import { canSeeMoney, useCurrentStaffRole } from "@/lib/staff-roles";
 
 export const Route = createFileRoute("/admin/")({
   component: BookingsPage,
@@ -72,6 +73,9 @@ function BookingsPage() {
   const [directionFilter, setDirectionFilter] = useState<string>("all");
 
   const bookings = useBookings();
+  const canSeePrices = canSeeMoney(useCurrentStaffRole());
+  // One query for the whole list, not one per card; only for roles that may read prices.
+  const prices = useBookingPrices(canSeePrices);
 
   if (bookings.isPending) return <p className="text-muted-foreground">Загрузка заявок…</p>;
   // A failed background refetch keeps the loaded list (and an open add-booking dialog).
@@ -137,12 +141,28 @@ function BookingsPage() {
         />
       </div>
 
+      {/* A failed background refetch keeps the loaded prices, like the list itself. Without them
+          no price field is shown: an empty field would look like "no price yet", and a price
+          typed into it would replace one the user can't see. */}
+      {canSeePrices && prices.isError && !prices.data && (
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-sm text-destructive">Не удалось загрузить цены.</p>
+          <Button variant="outline" size="sm" onClick={() => prices.refetch()}>
+            Повторить
+          </Button>
+        </div>
+      )}
+
       {visible.length === 0 ? (
         <p className="text-muted-foreground">Заявок нет.</p>
       ) : (
         <ul className="space-y-3">
           {visible.map((b) => (
-            <BookingCard key={b.id} booking={b} />
+            <BookingCard
+              key={b.id}
+              booking={b}
+              prices={canSeePrices ? (prices.data ?? null) : null}
+            />
           ))}
         </ul>
       )}
@@ -522,9 +542,9 @@ function LabeledField({ id, label, children }: { id: string; label: string; chil
   );
 }
 
-function BookingCard({ booking: b }: { booking: Booking }) {
+// prices: null when this user can't see prices or they haven't loaded; the field is hidden then.
+function BookingCard({ booking: b, prices }: { booking: Booking; prices: BookingPrices | null }) {
   const update = useUpdateBooking();
-  const canSeePrices = useCanSeePrices();
   const [note, setNote] = useState(b.note ?? "");
   // Follow the saved note when a refetch brings another manager's edit, so saving a stale
   // draft doesn't silently overwrite it.
@@ -634,7 +654,7 @@ function BookingCard({ booking: b }: { booking: Booking }) {
         )}
       </dl>
 
-      {canSeePrices && <BookingPrice booking={b} />}
+      {prices && <BookingPrice booking={b} saved={prices.get(b.id)} />}
 
       <div className="mt-3 space-y-2">
         <Textarea
@@ -669,17 +689,25 @@ function BookingCard({ booking: b }: { booking: Booking }) {
 }
 
 // Owner and accountant only (the card renders it only for them; the database enforces it).
-function BookingPrice({ booking: b }: { booking: Booking }) {
-  const prices = useBookingPrices(true);
+// saved: undefined when the booking has no price yet.
+function BookingPrice({ booking: b, saved }: { booking: Booking; saved: number | undefined }) {
   const setPrice = useSetBookingPrice();
-  const saved = prices.data?.get(b.id);
-  const [draft, setDraft] = useState(saved?.toString() ?? "");
+  const savedText = saved?.toString() ?? "";
+  const [draft, setDraft] = useState(savedText);
   const [reason, setReason] = useState("");
-  // Follow the saved price when a refetch brings another user's change, like the note.
-  useEffect(() => setDraft(saved?.toString() ?? ""), [saved]);
+  // Follow the saved price when a refetch brings another user's change, like the note. The reason
+  // goes too: it was written for the change that was just replaced.
+  useEffect(() => {
+    setDraft(savedText);
+    setReason("");
+  }, [savedText]);
 
-  const price = draft.trim() === "" ? null : Number(draft);
-  const valid = price !== null && Number.isInteger(price) && price >= 0 && price <= MAX_PRICE;
+  // Spaces are allowed ("1 500"), anything else isn't stripped but rejected: "1500.50" pasted from
+  // a spreadsheet must not turn into 150050.
+  const digits = draft.replace(/\s/g, "");
+  const valid = /^\d+$/.test(digits) && Number(digits) <= MAX_PRICE;
+  const price = valid ? Number(digits) : null;
+  const dirty = digits !== savedText;
   const changed = valid && price !== saved;
   const locked = b.price_locked_at !== null;
 
@@ -688,13 +716,10 @@ function BookingPrice({ booking: b }: { booking: Booking }) {
   const needsReason = changed && locked && saved !== undefined;
 
   const canSave = changed && (!needsReason || reason.trim() !== "");
-
-  if (prices.isPending) return null;
-  // Without the saved prices, an empty field would look like "no price yet": a price typed into it
-  // would replace one the user can't see. So no field at all until the prices load.
-  if (prices.isError) {
-    return <p className="mt-3 text-sm text-destructive">Не удалось загрузить цену.</p>;
-  }
+  const reset = () => {
+    setDraft(savedText);
+    setReason("");
+  };
 
   return (
     <div className="mt-3 space-y-2 rounded-md bg-muted/50 p-3">
@@ -706,13 +731,21 @@ function BookingPrice({ booking: b }: { booking: Booking }) {
           id={`price-${b.id}`}
           inputMode="numeric"
           value={draft}
-          onChange={(e) => setDraft(e.target.value.replace(/\D/g, ""))}
+          onChange={(e) => setDraft(e.target.value)}
           placeholder="не указана"
           className="w-36"
         />
-        {saved !== undefined && !changed && <span className="text-sm">{formatPrice(saved)}</span>}
-        {locked && <Badge variant="outline">Согласована</Badge>}
+        {saved !== undefined && !dirty && <span className="text-sm">{formatPrice(saved)}</span>}
+        {/* The lock alone doesn't mean a price was agreed: there may be none yet. */}
+        {locked && saved !== undefined && <Badge variant="outline">Согласована</Badge>}
       </div>
+      {dirty && !valid && (
+        <p className="text-sm text-destructive">
+          {digits === ""
+            ? "Цену нельзя удалить, только изменить."
+            : "Введите целое число тенге, без копеек."}
+        </p>
+      )}
       {needsReason && (
         <Input
           value={reason}
@@ -721,28 +754,19 @@ function BookingPrice({ booking: b }: { booking: Booking }) {
           maxLength={500}
         />
       )}
-      {changed && (
+      {dirty && (
         <div className="flex gap-2">
           <Button
             size="sm"
             disabled={!canSave || setPrice.isPending}
             onClick={() =>
-              setPrice.mutate(
-                { bookingId: b.id, price: price!, ...(needsReason ? { reason } : {}) },
-                { onSuccess: () => setReason("") },
-              )
+              price !== null &&
+              setPrice.mutate({ bookingId: b.id, price, ...(needsReason ? { reason } : {}) })
             }
           >
             Сохранить цену
           </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => {
-              setDraft(saved?.toString() ?? "");
-              setReason("");
-            }}
-          >
+          <Button size="sm" variant="ghost" onClick={reset}>
             Отмена
           </Button>
         </div>
