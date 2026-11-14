@@ -32,16 +32,88 @@ export type Database = {
         }
         Relationships: []
       }
+      booking_price_changes: {
+        Row: {
+          booking_id: string
+          changed_at: string
+          changed_by: string | null
+          id: number
+          locked: boolean
+          new_price: number
+          old_price: number | null
+          reason: string | null
+        }
+        Insert: {
+          booking_id: string
+          changed_at?: string
+          changed_by?: string | null
+          id?: never
+          locked: boolean
+          new_price: number
+          old_price?: number | null
+          reason?: string | null
+        }
+        Update: {
+          booking_id?: string
+          changed_at?: string
+          changed_by?: string | null
+          id?: never
+          locked?: boolean
+          new_price?: number
+          old_price?: number | null
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_price_changes_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      booking_prices: {
+        Row: {
+          booking_id: string
+          price: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          booking_id: string
+          price: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          booking_id?: string
+          price?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_prices_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           car: string | null
           created_at: string
           direction: string
+          done_at: string | null
           id: string
           name: string
           note: string | null
           phone: string
           preferred_date: string | null
+          price_locked_at: string | null
           service: string
           slot_start: string | null
           source: string
@@ -51,11 +123,13 @@ export type Database = {
           car?: string | null
           created_at?: string
           direction?: string
+          done_at?: string | null
           id?: string
           name: string
           note?: string | null
           phone: string
           preferred_date?: string | null
+          price_locked_at?: string | null
           service: string
           slot_start?: string | null
           source?: string
@@ -65,11 +139,13 @@ export type Database = {
           car?: string | null
           created_at?: string
           direction?: string
+          done_at?: string | null
           id?: string
           name?: string
           note?: string | null
           phone?: string
           preferred_date?: string | null
+          price_locked_at?: string | null
           service?: string
           slot_start?: string | null
           source?: string
@@ -91,6 +167,10 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      set_booking_price: {
+        Args: { p_booking_id: string; p_price: number; p_reason?: string }
+        Returns: undefined
+      }
     }
     Enums: {
       staff_role: "manager" | "owner" | "accountant"

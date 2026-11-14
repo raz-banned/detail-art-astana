@@ -13,6 +13,9 @@ import { acceptsBookings, DIRECTIONS, directionTitle } from "./directions";
 // "cancelled" must stay too: it's the one status that frees a time slot
 // (bookings_direction_slot_unique and busy_slots in supabase/sql/2026-10-15-bookings-slots.sql).
 // A new closing status (e.g. a no-show) keeps its slot taken unless that SQL is changed as well.
+// "scheduled", "ready_for_pickup" and "done" lock the price, and "done" sets done_at, which revenue
+// is counted by (bookings_status_guard in supabase/sql/2026-11-14-booking-prices.sql): renaming
+// them or adding a status after the client agreed needs that trigger changed too.
 export const BOOKING_STATUSES = [
   { value: "new", label: "Новая, без оценки" },
   { value: "in_progress", label: "Осмотр и оценка" },
