@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Toaster } from "@/components/ui/sonner";
-import { StaffRoleContext, staffRoleLabel, useStaffRole } from "@/lib/staff-roles";
+import { canSeeMoney, StaffRoleContext, staffRoleLabel, useStaffRole } from "@/lib/staff-roles";
 
 // CRM for staff. Access control is enforced by Supabase RLS (see supabase/sql/);
 // this layout only decides what to show. The session lives in the browser, so the
@@ -118,6 +118,15 @@ function AdminLayout() {
                 >
                   Расписание
                 </Link>
+                {/* Only a convenience: the page and the database check the role themselves. */}
+                {canSeeMoney(role.data) && (
+                  <Link
+                    to="/admin/revenue"
+                    className="text-muted-foreground hover:text-primary data-[status=active]:text-foreground"
+                  >
+                    Выручка
+                  </Link>
+                )}
               </nav>
             </div>
             <div className="flex items-center gap-3 text-sm">
@@ -140,7 +149,7 @@ function AdminLayout() {
           </div>
         </header>
         <main className="mx-auto max-w-5xl px-4 py-6">
-          <StaffRoleContext.Provider value={role.data}>
+          <StaffRoleContext.Provider value={role.isError ? null : role.data}>
             <Outlet />
           </StaffRoleContext.Provider>
         </main>

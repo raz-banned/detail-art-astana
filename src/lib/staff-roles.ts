@@ -39,15 +39,16 @@ export function useStaffRole(userId: string | undefined, enabled: boolean) {
 }
 
 // The signed-in user's role, provided by the /admin layout, which already loads it, so pages
-// don't query it again. undefined while loading or on error: treated as the least access.
-export const StaffRoleContext = createContext<StaffRole | undefined>(undefined);
+// don't query it again. undefined while loading, null if it failed to load: both mean the least
+// access, but a page can tell "wait" from "give up".
+export const StaffRoleContext = createContext<StaffRole | null | undefined>(undefined);
 
-export function useCurrentStaffRole(): StaffRole | undefined {
+export function useCurrentStaffRole(): StaffRole | null | undefined {
   return useContext(StaffRoleContext);
 }
 
 // Roles that see money: booking prices now, revenue later. Must match has_role('{owner,accountant}')
 // in the RLS policies (supabase/sql/2026-11-14-booking-prices.sql).
-export function canSeeMoney(role: StaffRole | undefined): boolean {
+export function canSeeMoney(role: StaffRole | null | undefined): boolean {
   return role === "owner" || role === "accountant";
 }
