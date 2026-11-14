@@ -593,7 +593,7 @@ function BookingCard({ booking: b }: { booking: Booking }) {
             )
           }
         >
-          <SelectTrigger className="w-full sm:w-40">
+          <SelectTrigger className="w-full sm:w-48">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
