@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/booking-prices";
-import { astanaDay, shiftDay } from "@/lib/booking-slots";
+import { astanaDay, daysBetween, monthStart, shiftDay } from "@/lib/booking-slots";
 import { canSeeMoney, useCurrentStaffRole } from "@/lib/staff-roles";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,15 +19,21 @@ export const Route = createFileRoute("/admin/revenue")({
 // a wide range shows a message instead of a failed request.
 const MAX_RANGE_DAYS = 366;
 
-function daysBetween(from: string, to: string): number {
-  return (Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000;
-}
-
 function RevenuePage() {
   const role = useCurrentStaffRole();
-  // Default: this month so far, in Astana days.
-  const [to, setTo] = useState(() => astanaDay());
-  const [from, setFrom] = useState(() => `${astanaDay().slice(0, 8)}01`);
+  // Default: this month so far, in Astana days. One `today` for both ends: two calls around
+  // midnight at a month's end would give a range that starts after it ends.
+  const [range, setRange] = useState(() => {
+    const today = astanaDay();
+    return { from: monthStart(today), to: today };
+  });
+  const { from, to } = range;
+  const setFrom = (value: string) => setRange((r) => ({ ...r, from: value }));
+  const setTo = (value: string) => setRange((r) => ({ ...r, to: value }));
+  const preset = (fromDay: (today: string) => string) => {
+    const today = astanaDay();
+    setRange({ from: fromDay(today), to: today });
+  };
 
   const span = from && to ? daysBetween(from, to) : NaN;
   const rangeError = !(span >= 0)
@@ -41,6 +47,9 @@ function RevenuePage() {
     // Under ["admin", ...], so the layout drops it on logout or an account switch.
     queryKey: ["admin", "revenue", from, to],
     enabled: allowed && !rangeError,
+    // Keep the previous numbers on screen while a new range loads, instead of "Загрузка…" on
+    // every date change.
+    placeholderData: keepPreviousData,
     queryFn: async () => {
       const { data, error } = await supabase.rpc("revenue_by_day", { p_from: from, p_to: to });
       if (error) throw error;
@@ -48,8 +57,11 @@ function RevenuePage() {
     },
   });
 
-  // The role is still loading: show nothing rather than flash "no access".
-  if (role === undefined) return null;
+  // The role is still loading: don't flash "no access".
+  if (role === undefined) return <p className="text-muted-foreground">Загрузка…</p>;
+  if (role === null) {
+    return <p className="text-destructive">Не удалось загрузить вашу роль. Обновите страницу.</p>;
+  }
   if (!allowed) {
     return <p className="text-muted-foreground">Выручку видят только владелец и бухгалтер.</p>;
   }
@@ -83,26 +95,10 @@ function RevenuePage() {
           <Label htmlFor="revenue-to">По</Label>
           <Input id="revenue-to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            const today = astanaDay();
-            setFrom(shiftDay(today, -6));
-            setTo(today);
-          }}
-        >
+        <Button variant="ghost" size="sm" onClick={() => preset((today) => shiftDay(today, -6))}>
           7 дней
         </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            const today = astanaDay();
-            setFrom(`${today.slice(0, 8)}01`);
-            setTo(today);
-          }}
-        >
+        <Button variant="ghost" size="sm" onClick={() => preset(monthStart)}>
           Этот месяц
         </Button>
       </div>
@@ -111,7 +107,7 @@ function RevenuePage() {
         <p className="text-sm text-destructive">{rangeError}</p>
       ) : revenue.isPending ? (
         <p className="text-muted-foreground">Загрузка…</p>
-      ) : revenue.isError ? (
+      ) : revenue.isError && !revenue.data ? (
         <div className="space-y-3">
           <p className="text-destructive">Не удалось загрузить выручку.</p>
           <Button variant="outline" onClick={() => revenue.refetch()}>

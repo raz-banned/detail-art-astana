@@ -134,6 +134,16 @@ export function slotLabel(timestamp: string): string {
 }
 
 // The day after or before an Astana day, "2026-10-20" → "2026-10-21".
+// Whole days from one "2026-10-20" day to another; negative if `to` is earlier.
+export function daysBetween(from: string, to: string): number {
+  return (Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / DAY_MS;
+}
+
+// The first day of a day's month: "2026-10-20" → "2026-10-01".
+export function monthStart(day: string): string {
+  return `${day.slice(0, 8)}01`;
+}
+
 export function shiftDay(day: string, days: number): string {
   return new Date(Date.parse(`${day}T00:00:00Z`) + days * DAY_MS).toISOString().slice(0, 10);
 }

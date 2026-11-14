@@ -7,7 +7,7 @@
 -- A prototype on prices typed into the CRM, until the company has a cash register / 1C.
 
 -- 1. Revenue counts done bookings by done_at; this keeps the lookup cheap as bookings grow.
-create index bookings_done_at on public.bookings (done_at) where done_at is not null;
+create index if not exists bookings_done_at on public.bookings (done_at) where done_at is not null;
 
 -- 2. Revenue by Astana day, for days p_from..p_to inclusive (dates as Astana sees them).
 -- - Astana is a fixed +05:00, the same as UTC_OFFSET_HOURS in src/lib/booking-slots.ts, so the
@@ -27,11 +27,13 @@ security invoker
 set search_path = ''
 as $$
 declare
+  -- Astana's offset, once: the range bounds and the day grouping must use the same one.
+  v_tz constant interval := '+05:00';
   -- Astana midnight at the start of p_from, and at the start of the day after p_to: `<` on the end
   -- keeps a booking done exactly at midnight in one day only. Comparing done_at with the dates
   -- directly would use the session's time zone (UTC), not Astana's.
-  v_start timestamptz := p_from::timestamp at time zone interval '+05:00';
-  v_end timestamptz := (p_to + 1)::timestamp at time zone interval '+05:00';
+  v_start timestamptz := p_from::timestamp at time zone v_tz;
+  v_end timestamptz := (p_to + 1)::timestamp at time zone v_tz;
 begin
   if not (select public.has_role('{owner,accountant}')) then
     raise exception 'Only the owner or the accountant can see revenue' using errcode = '42501';
@@ -46,7 +48,7 @@ begin
 
   return query
     select
-      (b.done_at at time zone interval '+05:00')::date,
+      (b.done_at at time zone v_tz)::date,
       coalesce(sum(bp.price), 0)::bigint,
       count(*)::integer,
       (count(*) filter (where bp.price is null))::integer

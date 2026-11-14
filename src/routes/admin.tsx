@@ -149,7 +149,7 @@ function AdminLayout() {
           </div>
         </header>
         <main className="mx-auto max-w-5xl px-4 py-6">
-          <StaffRoleContext.Provider value={role.data}>
+          <StaffRoleContext.Provider value={role.isError ? null : role.data}>
             <Outlet />
           </StaffRoleContext.Provider>
         </main>
