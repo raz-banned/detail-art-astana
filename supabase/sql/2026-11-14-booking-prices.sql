@@ -66,7 +66,9 @@ create policy "Owner and accountant can read price changes" on public.booking_pr
 create or replace function public.bookings_status_guard()
 returns trigger
 language plpgsql
-security definer
+-- security invoker: it only edits the row in memory and calls has_role(), which staff may
+-- already execute, so it needs no rights beyond the caller's.
+security invoker
 set search_path = ''
 as $$
 begin
